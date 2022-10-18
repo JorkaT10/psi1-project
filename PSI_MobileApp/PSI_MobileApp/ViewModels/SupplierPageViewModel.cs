@@ -19,16 +19,7 @@ namespace PSI_MobileApp.ViewModels
             Address testAddress = new() {city="Vilnius", streetName="Didlaukio g.", streetNumber=47 };
             Profiles = new ObservableCollection<Profile>()
             {
-                new Profile{Email = "test1", PhoneNumber = "test12", Name = "Name1", Rating = 4, Address=testAddress, 
-                    Advertisements=new ObservableCollection<Advertisement>(){
-                        new Advertisement{MealName="Pizza", TimeOfMaking=TimeSpan.Zero, PickupTimeSpan=TimeSpan.Zero, Tags=new Kitchen[]{Kitchen.Lithuanian }},
-                        new Advertisement{MealName="Pizza", TimeOfMaking=TimeSpan.Zero, PickupTimeSpan=TimeSpan.Zero, Tags=new Kitchen[]{Kitchen.Lithuanian }},
-                        new Advertisement{MealName="Pizza", TimeOfMaking=TimeSpan.Zero, PickupTimeSpan=TimeSpan.Zero, Tags=new Kitchen[]{Kitchen.Lithuanian }},
-                        new Advertisement{MealName="Pizza", TimeOfMaking=TimeSpan.Zero, PickupTimeSpan=TimeSpan.Zero, Tags=new Kitchen[]{Kitchen.Lithuanian }},
-                        new Advertisement{MealName="Pizza", TimeOfMaking=TimeSpan.Zero, PickupTimeSpan=TimeSpan.Zero, Tags=new Kitchen[]{Kitchen.Lithuanian }},
-                        new Advertisement{MealName="Pizza", TimeOfMaking=TimeSpan.Zero, PickupTimeSpan=TimeSpan.Zero, Tags=new Kitchen[]{Kitchen.Lithuanian }}
-                    }
-                },
+                new Profile{Email = "test1", PhoneNumber = "test12", Name = "Name1", Rating = 4, Address=testAddress},
                 new Profile{Email = "test2", PhoneNumber = "test12", Name = "Name1", Rating = 4},
                 new Profile{Email = "test3", PhoneNumber = "test12", Name = "Name1", Rating = 4.0},
                 new Profile{Email = "test4", PhoneNumber = "test12", Name = "Name1", Rating = 4.0},
