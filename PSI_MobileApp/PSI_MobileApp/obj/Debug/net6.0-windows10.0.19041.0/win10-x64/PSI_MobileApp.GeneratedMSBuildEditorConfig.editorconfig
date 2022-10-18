@@ -7,75 +7,75 @@ build_property.InvariantGlobalization =
 build_property.PlatformNeutralAssembly = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = PSI_MobileApp
-build_property.ProjectDir = C:\Users\jorun\Source\Repos\psi1Test\PSI_MobileApp\PSI_MobileApp\
+build_property.ProjectDir = C:\Users\jorun\source\repos\psi1Test\PSI_MobileApp\PSI_MobileApp\
 
-[C:/Users/jorun/Source/Repos/psi1Test/PSI_MobileApp/PSI_MobileApp/App.xaml]
+[C:/Users/jorun/source/repos/psi1Test/PSI_MobileApp/PSI_MobileApp/App.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PSI_MobileApp.App.xaml
 build_metadata.AdditionalFiles.TargetPath = App.xaml
 build_metadata.AdditionalFiles.RelativePath = App.xaml
 
-[C:/Users/jorun/Source/Repos/psi1Test/PSI_MobileApp/PSI_MobileApp/AppShell.xaml]
+[C:/Users/jorun/source/repos/psi1Test/PSI_MobileApp/PSI_MobileApp/AppShell.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PSI_MobileApp.AppShell.xaml
 build_metadata.AdditionalFiles.TargetPath = AppShell.xaml
 build_metadata.AdditionalFiles.RelativePath = AppShell.xaml
 
-[C:/Users/jorun/Source/Repos/psi1Test/PSI_MobileApp/PSI_MobileApp/DetailPage.xaml]
+[C:/Users/jorun/source/repos/psi1Test/PSI_MobileApp/PSI_MobileApp/DetailPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PSI_MobileApp.DetailPage.xaml
 build_metadata.AdditionalFiles.TargetPath = DetailPage.xaml
 build_metadata.AdditionalFiles.RelativePath = DetailPage.xaml
 
-[C:/Users/jorun/Source/Repos/psi1Test/PSI_MobileApp/PSI_MobileApp/MainPage.xaml]
+[C:/Users/jorun/source/repos/psi1Test/PSI_MobileApp/PSI_MobileApp/MainPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PSI_MobileApp.MainPage.xaml
 build_metadata.AdditionalFiles.TargetPath = MainPage.xaml
 build_metadata.AdditionalFiles.RelativePath = MainPage.xaml
 
-[C:/Users/jorun/Source/Repos/psi1Test/PSI_MobileApp/PSI_MobileApp/NewOrderPage.xaml]
+[C:/Users/jorun/source/repos/psi1Test/PSI_MobileApp/PSI_MobileApp/NewOrderPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PSI_MobileApp.NewOrderPage.xaml
 build_metadata.AdditionalFiles.TargetPath = NewOrderPage.xaml
 build_metadata.AdditionalFiles.RelativePath = NewOrderPage.xaml
 
-[C:/Users/jorun/Source/Repos/psi1Test/PSI_MobileApp/PSI_MobileApp/NewUserPage.xaml]
+[C:/Users/jorun/source/repos/psi1Test/PSI_MobileApp/PSI_MobileApp/NewUserPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PSI_MobileApp.NewUserPage.xaml
 build_metadata.AdditionalFiles.TargetPath = NewUserPage.xaml
 build_metadata.AdditionalFiles.RelativePath = NewUserPage.xaml
 
-[C:/Users/jorun/Source/Repos/psi1Test/PSI_MobileApp/PSI_MobileApp/Resources/Styles/Colors.xaml]
+[C:/Users/jorun/source/repos/psi1Test/PSI_MobileApp/PSI_MobileApp/Resources/Styles/Colors.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PSI_MobileApp.Resources.Styles.Colors.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Colors.xaml
 build_metadata.AdditionalFiles.RelativePath = Resources\Styles\Colors.xaml
 
-[C:/Users/jorun/Source/Repos/psi1Test/PSI_MobileApp/PSI_MobileApp/Resources/Styles/Styles.xaml]
+[C:/Users/jorun/source/repos/psi1Test/PSI_MobileApp/PSI_MobileApp/Resources/Styles/Styles.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PSI_MobileApp.Resources.Styles.Styles.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Styles.xaml
 build_metadata.AdditionalFiles.RelativePath = Resources\Styles\Styles.xaml
 
-[C:/Users/jorun/Source/Repos/psi1Test/PSI_MobileApp/PSI_MobileApp/SearchPage.xaml]
+[C:/Users/jorun/source/repos/psi1Test/PSI_MobileApp/PSI_MobileApp/SearchPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PSI_MobileApp.SearchPage.xaml
 build_metadata.AdditionalFiles.TargetPath = SearchPage.xaml
 build_metadata.AdditionalFiles.RelativePath = SearchPage.xaml
 
-[C:/Users/jorun/Source/Repos/psi1Test/PSI_MobileApp/PSI_MobileApp/SupplierDemoView.xaml]
+[C:/Users/jorun/source/repos/psi1Test/PSI_MobileApp/PSI_MobileApp/SupplierDemoView.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PSI_MobileApp.SupplierDemoView.xaml
 build_metadata.AdditionalFiles.TargetPath = SupplierDemoView.xaml
 build_metadata.AdditionalFiles.RelativePath = SupplierDemoView.xaml
 
-[C:/Users/jorun/Source/Repos/psi1Test/PSI_MobileApp/PSI_MobileApp/SupplierDetailPage.xaml]
+[C:/Users/jorun/source/repos/psi1Test/PSI_MobileApp/PSI_MobileApp/SupplierDetailPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PSI_MobileApp.SupplierDetailPage.xaml
 build_metadata.AdditionalFiles.TargetPath = SupplierDetailPage.xaml
 build_metadata.AdditionalFiles.RelativePath = SupplierDetailPage.xaml
 
-[C:/Users/jorun/Source/Repos/psi1Test/PSI_MobileApp/PSI_MobileApp/SupplierListPage.xaml]
+[C:/Users/jorun/source/repos/psi1Test/PSI_MobileApp/PSI_MobileApp/SupplierListPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PSI_MobileApp.SupplierListPage.xaml
 build_metadata.AdditionalFiles.TargetPath = SupplierListPage.xaml

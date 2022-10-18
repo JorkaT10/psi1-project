@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jorun\\Source\\Repos\\psi1Test\\PSI_MobileApp\\PSI_MobileApp\\PSI_MobileApp.csproj": {}
+    "C:\\Users\\jorun\\source\\repos\\psi1Test\\PSI_MobileApp\\PSI_MobileApp\\PSI_MobileApp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jorun\\Source\\Repos\\psi1Test\\PSI_MobileApp\\PSI_MobileApp\\PSI_MobileApp.csproj": {
+    "C:\\Users\\jorun\\source\\repos\\psi1Test\\PSI_MobileApp\\PSI_MobileApp\\PSI_MobileApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jorun\\Source\\Repos\\psi1Test\\PSI_MobileApp\\PSI_MobileApp\\PSI_MobileApp.csproj",
+        "projectUniqueName": "C:\\Users\\jorun\\source\\repos\\psi1Test\\PSI_MobileApp\\PSI_MobileApp\\PSI_MobileApp.csproj",
         "projectName": "PSI_MobileApp",
-        "projectPath": "C:\\Users\\jorun\\Source\\Repos\\psi1Test\\PSI_MobileApp\\PSI_MobileApp\\PSI_MobileApp.csproj",
+        "projectPath": "C:\\Users\\jorun\\source\\repos\\psi1Test\\PSI_MobileApp\\PSI_MobileApp\\PSI_MobileApp.csproj",
         "packagesPath": "C:\\Users\\jorun\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jorun\\Source\\Repos\\psi1Test\\PSI_MobileApp\\PSI_MobileApp\\obj\\",
+        "outputPath": "C:\\Users\\jorun\\source\\repos\\psi1Test\\PSI_MobileApp\\PSI_MobileApp\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "fallbackFolders": [
