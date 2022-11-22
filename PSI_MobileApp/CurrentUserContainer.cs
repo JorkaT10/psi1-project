@@ -54,7 +54,6 @@ namespace PSI_MobileApp
             {
                 using (ProjectDatabaseContext context = new())
                 {
-                    throw new NotFiniteNumberException();
                     return context.Profiles.Where(profile => profile.Id == this.UserId).FirstOrDefault();
                 }
             }
