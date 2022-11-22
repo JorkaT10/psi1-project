@@ -6,6 +6,7 @@
 @using ClassLibrary
 @inject StateContainer StateContainer
 @inject NavigationManager NavigationManager
+@inject ExceptionLogger Logger
 @implements IDisposable
 @if(Add())
 {
@@ -30,14 +31,16 @@ else
                 {
                     Distributor newDistributor = new();
                     newDistributor.Id = StateContainer.TempAccount.Id;
+                    newDistributor.Rating = 4.9;
                     context.Add(newDistributor);
                 }
-                
+
                 context.SaveChanges();
             }
         }
         catch(Exception ex)
         {
+            Logger.Log(ex);
             return false;
         }
         return true;

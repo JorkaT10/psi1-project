@@ -1,47 +1,336 @@
 ﻿@page "/supplierlist/supplierdetails"
-@inject StateContainer StateContainer
-
-<h3>Supplier Details</h3>
-
-@if (StateContainer.Supplier == null)
+@using ClassLibrary
+@using System.Collections.ObjectModel
+@using Microsoft.EntityFrameworkCore
+@using PSI_MobileApp.Extensions
+@inject IdStateContainer IdContainer
+@inject CurrentUserContainer ProfileContainer
+@inject IDialogService DialogService
+@inject ExceptionLogger Logger
+@implements IDisposable
+@try
 {
-    <p>The supplier was not passed correctly or still loading.</p>
+<MudText Typo="Typo.h4">Supplier Details</MudText>
+
+<style>
+    .selected {
+        background-color: #1E88E5 !important;
+    }
+
+        .selected > td {
+            color: white !important;
+        }
+
+            .selected > td .mud-input {
+                color: white !important;
+            }
+</style>
+
+@if (IdContainer.Id == Guid.Empty && ExceptionMessage != string.Empty)
+{
+    <MudText Typo="Typo.h4">The supplier was not passed correctly or still loading. @ExceptionMessage</MudText>
+}
+else if (profile != null)
+{
+    
+    <MudText><b>Name:</b> @profile.Name</MudText>
+    <MudText><b>Email:</b> @profile.Email </MudText>
+    <MudText><b>Phone number:</b> @profile.PhoneNumber </MudText>
+    <MudText><b>Address:</b> @profile.TypedAddress.City, @profile.TypedAddress.StreetName st. @profile.TypedAddress.StreetNumber</MudText>
+    <MudText><b>Cuisines:</b> 
+        @foreach (var cuisine in profile.CuisineArray)
+        {
+            var last = profile.CuisineArray.LastOrDefault();
+            if (cuisine != last)
+                @(cuisine + ", ")
+            else
+                @cuisine
+        } 
+    </MudText>
+
+    <MudTable ServerData="@(new Func<TableState, Task<TableData<Advertisement>>>(ServerReload))"  OnRowClick="RowClickEvent" Hover="true" @ref="mudTable" RowClassFunc="@SelectAdvertisement" T="Advertisement" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortLabel="name" T="Advertisement">Name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortLabel="making_time" T="Advertisement">Time of making</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortLabel="pickup_time" T="Advertisement">Pickup Time</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortLabel="price" T="Advertisement">Price</MudTableSortLabel></MudTh>
+            @if (ProfileContainer.UserId == IdContainer.Id)
+            {
+               <MudTh><MudTableSortLabel SortLabel="reserved" T="Advertisement">Is Reserved</MudTableSortLabel></MudTh>
+            }
+        </HeaderContent>
+        <RowTemplate>
+            @if (context.Buyer == null)
+            {
+                <MudTd DataLabel="Name">@context.MealName</MudTd>
+                <MudTd DataLabel="Time Of Making">@HandleTime(context.TimeOfMaking)</MudTd>
+                <MudTd DataLabel="Pickup Deadline">@HandleTime(context.PickupTimeSpan)</MudTd>
+                <MudTd DataLabel="Price">@context.Cost Eur</MudTd>
+                if (ProfileContainer.UserId == IdContainer.Id)
+                {
+                   <MudTd DataLabel="Is Reserved">@(context.Buyer != null)</MudTd>
+                }
+            }
+            else if ((ProfileContainer.UserId != null) && (context.Buyer.Id == ProfileContainer.UserId || ProfileContainer.UserId == IdContainer.Id))
+            {
+                <MudTd DataLabel="Name">@context.MealName</MudTd>
+                <MudTd DataLabel="Time Of Making">@HandleTime(context.TimeOfMaking)</MudTd>
+                <MudTd DataLabel="Pickup Deadline">@HandleTime(context.PickupTimeSpan)</MudTd>
+                <MudTd DataLabel="Price">@context.Cost Eur</MudTd>
+                if (ProfileContainer.UserId == IdContainer.Id)
+                {
+                    <MudTd DataLabel="Is Reserved">@(context.Buyer != null)</MudTd>
+                }
+            }
+        </RowTemplate>
+    </MudTable>
+    @if (ProfileContainer.UserId != null)
+    {
+        if (ProfileContainer.UserId == IdContainer.Id)
+        {
+            <MudButton Variant="Variant.Filled" OnClick="AddOrderCommand" >
+                Add order
+            </MudButton>
+            <MudButton Variant="Variant.Filled" OnClick="RemoveOrderCommand">
+                Remove order
+            </MudButton>
+        }
+        if (ProfileContainer.UserId != IdContainer.Id)
+        {
+            <MudButton Variant="Variant.Filled" OnClick="BookOrderCommand">
+                Book order
+            </MudButton>
+        }
+    }
+    else
+    {
+        <MudText>Please log in to book orders.</MudText>
+    }
+        
+    
 }
 else
 {
-    <p>
-        Name: @StateContainer.Supplier.Name <br>
-        Email: @StateContainer.Supplier.Email <br>
-        Phone number: @StateContainer.Supplier.PhoneNumber <br>
-        Address: @StateContainer.Supplier.TypedAddress.city, @StateContainer.Supplier.TypedAddress.streetName @StateContainer.Supplier.TypedAddress.streetName <br>
-        Cuisines: @foreach (var cuisine in StateContainer.Supplier.CuisineArray){ @(cuisine + " ")} <br>
-    </p>
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Time Of Making</th>
-                <th>Pickup Time</th>
-            </tr>
-        </thead>
-        <tbody>
-          <!--  @if (StateContainer.Supplier.Advertisements != null)
-            {
-                foreach (var addv in StateContainer.Supplier.Advertisements)
-                {
-                    <tr>
-                        <td>@addv.MealName</td>
-                        <td>@addv.TimeOfMaking</td>
-                        <td>@addv.PickupTimeSpan</td>
-                    </tr>
-                }
-            }-->
-        </tbody>
-    </table>
-
+    <MudOverlay Visible="true" DarkBackground="true" Absolute="true">
+            <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+    </MudOverlay>
 }
 
-@code {
-    
+
+
+    @code {
+    private ProjectDatabaseContext dbContext;
+    private ObservableCollection<Advertisement> adverts;
+    private MudTable<Advertisement> mudTable;
+    private Advertisement SelectedAdvertisement { get; set; }
+    private int selectedRowNumber = -1;
+    private ProfileClasses.Profile profile;
+    private string ExceptionMessage { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            dbContext = new();
+            await RemoveOutOfDate(dbContext);
+            profile = await dbContext.Profiles.Where(p => p.Id == IdContainer.Id).FirstOrDefaultAsync();
+            try
+            {
+                adverts = dbContext.Advertisements.Where(a => a.Distributor.Id == profile.Id).ToObservableCollection();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(ex);
+                ExceptionMessage = ex.Message;
+            }
+        }
+        catch(Exception ex)
+        {
+            Logger.Log(ex);
+        }
+    }
+
+    public string SelectAdvertisement(Advertisement advert, int rowNumber)
+    {
+
+        if (selectedRowNumber == rowNumber) 
+        {
+            selectedRowNumber = -1;
+            SelectedAdvertisement = null;
+            return String.Empty;
+        }
+        else if (mudTable.SelectedItem != null && mudTable.SelectedItem.Equals(advert))
+        {
+            selectedRowNumber = rowNumber;
+            SelectedAdvertisement = advert;
+            return "selected";
+        }
+        else
+        {   
+            return String.Empty;
+        }
+
+
+    }
+
+    public async Task AddOrderCommand()
+    {   
+        try
+        {
+            DialogOptions noHeader = new DialogOptions() { NoHeader = true };
+            var dialog = DialogService.Show<AddOrderDialog>("", noHeader);
+            var res = await dialog.Result;
+
+            if (!res.Cancelled)
+            {
+                var adv = res.Data as Advertisement;
+                adv.Id = Guid.NewGuid();
+                var search = dbContext.Distributors.Where(d => d.Id == IdContainer.Id).FirstOrDefault();
+                adv.Distributor = search;
+                dbContext.Add<Advertisement>(adv as Advertisement);
+                selectedRowNumber = -1;
+                mudTable.SetSelectedItem(null);
+                await dbContext.SaveChangesAsync();
+                await mudTable.ReloadServerData();
+            }
+        }
+        catch(Exception ex)
+        {
+            Logger.Log(ex);
+        }
+        
+    }
+
+    private void RowClickEvent(TableRowClickEventArgs<Advertisement> tableRowClickEventArgs)
+    {
+        //SelectedAdvertisement = tableRowClickEventArgs.Item;
+    }
+
+    private async Task RemoveOrderCommand()
+    {
+        try
+        {
+            if (dbContext.Advertisements.Contains(SelectedAdvertisement))
+            {
+                dbContext.Advertisements.Remove(SelectedAdvertisement);
+                await dbContext.SaveChangesAsync();
+                await mudTable.ReloadServerData();
+            }
+        }
+        catch(Exception ex)
+        {
+            Logger.Log(ex);
+        }
+    }
+
+    private async Task BookOrderCommand()
+    {
+        try
+        {
+            if (SelectedAdvertisement != null)
+            {
+                var advert = dbContext.Advertisements.Where(i => i.Equals(SelectedAdvertisement));
+                var buyer = advert.FirstOrDefault().Buyer;
+                if (buyer == null)
+                {
+                    var currentProfile = ProfileContainer.GetUserProfile(); //dbContext.Profiles.Where(p => p.Id == ProfileContainer.UserId);
+                    advert.FirstOrDefault().Buyer = currentProfile;
+                    selectedRowNumber = -1;
+                    mudTable.SetSelectedItem(null);
+                    await dbContext.SaveChangesAsync();
+                    await mudTable.ReloadServerData();
+                }
+                else
+                {
+                    if (buyer.Id == ProfileContainer.UserId)
+                    {
+                        advert.FirstOrDefault().Buyer = null;
+                        selectedRowNumber = -1;
+                        mudTable.SetSelectedItem(null);
+                        await dbContext.SaveChangesAsync();
+                        await mudTable.ReloadServerData();
+                    }
+                }
+                SelectedAdvertisement = null;
+
+            }
+        }
+        catch(Exception ex)
+        {
+            Logger.Log(ex);
+        }
+        
+    }
+
+    public void Dispose()
+    {
+        IdContainer.OnChange -= StateHasChanged;
+    }
+
+    private string HandleTime(DateTime time)
+    {
+        return time.ToLocalTime().ToString("ddd, yyyy-MM-dd HH':'mm':'ss");
+    }
+
+    private IEnumerable<Advertisement> pagedData;
+    private int totalItems;
+    private async Task<TableData<Advertisement>> ServerReload(TableState state)
+    {
+        try
+        {
+            selectedRowNumber = -1;
+            mudTable.SetSelectedItem(null);
+            SelectedAdvertisement = null;
+            await RemoveOutOfDate(dbContext);
+            var query = dbContext.Advertisements.Include(a => a.Buyer).Where(a => a.Distributor.Id == profile.Id);
+            await Task.Delay(300);
+
+            switch (state.SortLabel)
+            {
+                case "name":
+                    query = query.OrderByDirection(state.SortDirection, o => o.MealName);
+                    break;
+                case "making_time":
+                    query = query.OrderByDirection(state.SortDirection, o => o.TimeOfMaking);
+                    break;
+                case "pickup_time":
+                    query = query.OrderByDirection(state.SortDirection, o => o.PickupTimeSpan);
+                    break;
+                case "price":
+                    query = query.OrderByDirection(state.SortDirection, o => o.Cost);
+                    break;
+                case "reserved":
+                    query = query.OrderByDirection(state.SortDirection, o => (o.Buyer != null));
+                    break;
+            }
+
+            totalItems = query.Count();
+            pagedData = await query.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArrayAsync();
+            return new TableData<Advertisement>() { TotalItems = totalItems, Items = pagedData };
+        }
+        catch(Exception ex)
+        {
+            Logger.Log(ex);
+            return null;
+        }
+        
+    }
+
+    public async Task RemoveOutOfDate(ProjectDatabaseContext context)
+    {
+        try
+        {
+            context.RemoveRange(context.Advertisements.Where(a => a.PickupTimeSpan < DateTime.UtcNow));
+            await context.SaveChangesAsync();
+        }
+        catch(Exception ex)
+        {
+            Logger.Log(ex);
+        }
+    }
+}
+}
+catch(Exception ex)
+{
+    Logger.Log(ex);
 }

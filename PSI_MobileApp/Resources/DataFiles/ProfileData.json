@@ -3,6 +3,11 @@
     "Email": "email2",
     "PhoneNumber": "number2",
     "Name": "test2",
+    "Address": {
+      "City": "Vilnius",
+      "StreetNumber": 15,
+      "StreetName": "Didlaukio g."
+    },
     "Rating": 2.0,
     "Cuisines": [
       "European",

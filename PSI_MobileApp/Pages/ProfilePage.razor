@@ -4,16 +4,19 @@
 @using System.Collections.ObjectModel
 @inject StateContainer StateContainer
 @inject NavigationManager NavigationManager
+@inject CurrentUserContainer CurrentUserContainer
+@inject ExceptionLogger Logger
 @implements IDisposable
 <h3> </h3>
-@if(StateContainer.CurrentAccount != null)
+@if (CurrentUserContainer.UserId != null)
 {
     <h3> Test </h3>
+    <MudButton @onclick = "Logout">Logout</MudButton>
 }
 else
 {
-    <MudButton @onclick="Login"> Login </MudButton>
-    <MudButton @onclick="Register"> Register</MudButton>
+    <MudButton @onclick="Login" Variant="Variant.Filled"> Login </MudButton>
+    <MudButton @onclick="Register" Variant="Variant.Filled"> Register</MudButton>
 }
 
 
@@ -24,6 +27,12 @@ else
         NavigationManager.NavigateTo("chooseaccounttype");
         StateContainer.TempAccount = new();
         StateContainer.TempProfile = new();
+    }
+
+    public void Logout()
+    {
+        CurrentUserContainer.Logout(Logger);
+        NavigationManager.NavigateTo("profile");
     }
 
     public void Login()

@@ -5,59 +5,42 @@
 @using System.Collections.ObjectModel
 @using System.Text.Json
 @using ClassLibrary
+@using System.ComponentModel.DataAnnotations
 @inject StateContainer StateContainer
 @inject NavigationManager NavigationManager
 @implements IDisposable
 <h3>Input Contact Data</h3>
 
-<EditForm Model="@filter" OnValidSubmit="@HandleValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-    <table>
-        <tr>
-            <td class="labelcell">
-                <div class="label">
-                    <label for="Establisment Name"> Establisment Name:</label>
-                </div>
-            </td>
-
-            <td>
-                <input type="text" @bind-value="filter.DistributorName" id="username" name="name">
-            </td>
-
-        </tr>
-        <tr>
-            <td class="labelcell">
-                <div class="label">
-                    <label for="Phone Number"> Phone Number:</label>
-                </div>
-            </td>
-
-            <td>
-                <input type="text" @bind-value="filter.DistributorPhone" id="phonenumber" name="number">
-            </td>
-
-        </tr>
-        <tr>
-            <td>Address:</td>
-            <td><MudTextField @bind-Value="filter.DistributorCityName" Label="City Name" Variant="Variant.Text" Margin="Margin.Dense"></MudTextField></td>
-            <td> <MudTextField @bind-Value="filter.DistributorStreetName" Label="Street Name" Variant="Variant.Text" Margin="Margin.Dense"></MudTextField></td>
-            <td><MudTextField @bind-Value="filter.DistributorStreetNumber" Label="Street Number" Variant="Variant.Text" Margin="Margin.Dense"></MudTextField></td>
-        </tr>
-    </table>
-    <input type="submit" class="btn btn-primary" value="Save" />
-</EditForm>
+<MudForm @bind-isValid="@isValid">
+    @if(StateContainer.CreatingDistributor)
+    {
+        <MudTextField T="string" Label="Establisment Name" @bind-Value="DistributorName" Required="true" RequiredError="Please enter the name of Your Establishment!" />
+    }
+    <MudTextField T="string" Label="Phone Number" @bind-Value="Phone" Required="false" Validation="@(new PhoneAttribute() {ErrorMessage = "This is not a valid Phone Number."})"/>
+    <MudTextField T="string" Label="City" @bind-Value="City" Required="true" RequiredError="Field City is required." />
+    <MudTextField T="string" Label="Street Name" @bind-Value="StreetName" Required="true" RequiredError="Field Street Name is required." />
+    <MudTextField T="int?" Label="Street Number" @bind-Value="StreetNumber" Required="true" RequiredError="Field Street Number is required." Validation="@(new RangeAttribute(1, 1000000) {ErrorMessage = "A Street Number can not be negative or zero."})" />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!isValid)" Class="ml-auto" @onclick="HandleValidSubmit">Register</MudButton>
+</MudForm>
 
 @code {
-    public DistributorModel filter = new();
+    public string Phone;
+    public string City;
+    public string StreetName;
+    public int? StreetNumber;
+    public bool isValid;
+    public string DistributorName = string.Empty;
     public void HandleValidSubmit()
     {
         Address address = new();
-        address.streetNumber = (int)filter.DistributorStreetNumber;
-        address.streetName = filter.DistributorStreetName;
-        address.city = filter.DistributorCityName;
-        StateContainer.TempProfile.Name = filter.DistributorName;
-        StateContainer.TempProfile.PhoneNumber = filter.DistributorPhone;
+        if(StateContainer.CreatingDistributor)
+        {
+            StateContainer.TempProfile.Name = DistributorName;
+        }
+        address.StreetNumber = (int)StreetNumber;
+        address.StreetName = StreetName;
+        address.City = City;
+        StateContainer.TempProfile.PhoneNumber = Phone;
         StateContainer.TempProfile.TypedAddress = address;
         NavigationManager.NavigateTo("choosecuisines");
     }

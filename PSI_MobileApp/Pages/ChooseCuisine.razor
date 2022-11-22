@@ -23,7 +23,7 @@ else
             <MudSelectItem T="string" Value="@kitchen">@kitchen</MudSelectItem>
 }
 </MudSelect>
-<MudButton OnClick="Check"> Confirm </MudButton>
+<MudButton OnClick="Check" Variant="Variant.Filled"> Confirm </MudButton>
 @code {
     public string cuisine;
     public IEnumerable<string> cuisines { get; set; } = new HashSet<string>() { };

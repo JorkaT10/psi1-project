@@ -3,8 +3,10 @@
 @using ClassLibrary
 @using ProfileClasses
 @using System.Collections.ObjectModel
+@inject CurrentUserContainer CurrentUserContainer
 @using Microsoft.EntityFrameworkCore
 @inject StateContainer StateContainer
+@inject ExceptionLogger Logger
 @inject NavigationManager NavigationManager
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
@@ -34,7 +36,7 @@
         </tr>
 
     </table>
-    <MudButton OnClick="HandleValidSubmit"> Login </MudButton>
+    <MudButton OnClick="HandleValidSubmit" Variant="Variant.Filled"> Login </MudButton>
  </form>
 
 
@@ -45,11 +47,18 @@
 
     public void HandleValidSubmit()
     {
-        using (var context = DbFactory.CreateDbContext())
+        try
         {
-            StateContainer.CurrentAccount = context.Accounts.Where(elem => elem.Password == Password && elem.UserName == Username).FirstOrDefault();
+            using (var context = DbFactory.CreateDbContext())
+            {
+                CurrentUserContainer.UserId = context.Accounts.Where(elem => elem.Password == Password && elem.UserName == Username).Select(elem => elem.Id).FirstOrDefault();
+            }
         }
-        if(StateContainer.CurrentAccount != null){
+        catch(Exception ex)
+        {
+            Logger.Log(ex);
+        }
+        if(CurrentUserContainer.UserId != null){
             NavigationManager.NavigateTo("");
         }
         

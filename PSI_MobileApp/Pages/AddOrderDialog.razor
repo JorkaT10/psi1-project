@@ -1,0 +1,95 @@
+﻿@using ClassLibrary
+@using System.Diagnostics.CodeAnalysis
+<MudDialog Style="max-height:500px; width:370px; overflow-y: scroll">
+    <DialogContent>
+        <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+            <MudTextField T="string" Label="Dish name" Margin="Margin.Normal" @bind-Value="MealName" Required="true" RequiredError="Please enter name."/>
+            <MudNumericField HideSpinButtons="true" Format="F2" T="double" Label="Price" Margin="Margin.Normal" @bind-Value="Price" Adornment="Adornment.End" AdornmentText="Eur" Required="true" RequiredError="Please enter price." Immediate="true" Step=".01F"/>
+            <MudSelect T="string" Label="Cuisines" MultiSelection="true" @bind-Value="cuisine" @bind-SelectedValues="cuisines">
+                @foreach (var kitchen in Kitchens)
+                {
+                    <MudSelectItem T="string" Value="@kitchen">@kitchen</MudSelectItem>
+                }
+            </MudSelect>
+            <MudDatePicker Label="Pickup date" PickerVariant="PickerVariant.Static" @bind-Date="PickUpDate" DateFormat="YYYY-MM-DD" MinDate="DateTime.Now.AddDays(-1)" Required="true" RequiredError="Plese choose a date." />
+            <MudTimePicker Label="Pickup time" PickerVariant="PickerVariant.Static" @bind-Time="TimeSpan" Required="true" RequiredError="Plese choose the time." />
+        </MudForm>
+        <MudText Color="Color.Error">@NumberCorrect</MudText>
+        <MudText Color="Color.Error">@TimeCorrect</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton  OnClick="Cancel">Cancel</MudButton>
+        <MudButton  OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    MudForm form;
+    bool success;
+    public string[] errors = { };
+    [Parameter] public string MealName { get; set; }
+    [Parameter] public double Price { get; set; } = 0;
+    public string cuisine;
+    private string NumberCorrect { get; set; } = string.Empty;
+    private string TimeCorrect { get; set; } = string.Empty;
+    public IEnumerable<string> cuisines { get; set; } = new HashSet<string>() { };
+    public string[] Kitchens = (Enum.GetNames(typeof(Cuisines))).SkipLast(1).ToArray();
+    public DateTime? PickUpDate { get; set; }
+    public TimeSpan? TimeSpan { get; set; }
+
+
+    public async Task Submit()
+    {
+        NumberCorrect = string.Empty;
+        TimeCorrect = string.Empty;
+        if (Price > 0 && (PickUpDate+TimeSpan > DateTime.Now.Date + new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)))
+        {
+            NumberCorrect = string.Empty;
+            TimeCorrect = string.Empty;
+            await form.Validate();
+            if (form.IsValid)
+            {
+                List<Cuisines> list = new List<Cuisines>();
+                if (cuisines.Count() == 0)
+                {
+                    list.Add(Cuisines.None);
+                }
+                else
+                {
+                    foreach (var elem in cuisines)
+                    {
+                        list.Add((Cuisines)Enum.Parse(typeof(Cuisines), elem));
+                    }
+                }
+                Advertisement adv = new Advertisement()
+                    {
+                        MealName = MealName,
+                        Buyer = null,
+                        TagsArray = list.ToArray(),
+                        PickupTimeSpan = (DateTime)(PickUpDate.Value.ToUniversalTime() + TimeSpan),
+                        TimeOfMaking = DateTime.UtcNow,
+                        Cost = Price
+                    };
+                MudDialog.Close(DialogResult.Ok<Advertisement>(adv));
+            }
+        }
+        else if (Price <= 0 && (PickUpDate + TimeSpan > DateTime.Now.Date + DateTime.Now.TimeOfDay))
+        {
+            NumberCorrect = "The price needs to be Higher then 0.";
+            TimeCorrect = string.Empty;
+        }
+        else if ((Price > 0 && (PickUpDate + TimeSpan < DateTime.Now.Date + DateTime.Now.TimeOfDay)) || (Price > 0 && PickUpDate == null && TimeSpan == null))
+        {
+            TimeCorrect = "The date and time needs to be selected and Higher then current time.";
+            NumberCorrect = string.Empty;
+        }
+        else
+        {
+            NumberCorrect = "The price needs to be Higher then 0.";
+            TimeCorrect = "The date and time needs to be selected and Higher then current time.";
+        }
+    }
+    public void Cancel() => MudDialog.Cancel();
+    
+}

@@ -13,12 +13,12 @@
 
 <h3>Create new account</h3>
 <!--<MudText> Test </MudText>-->
-<MudForm @bind-isValid="@isValid">
+<MudForm @bind-isValid = "@isValid">
     <MudTextField T="string" Label="Username" @bind-Value="Username" Required="true" RequiredError="Field Username is required." />  <!--Validation="@(new Func<string, string>(IsUniqueUsername))" -->
-    <MudTextField T="string" Label="Password" @bind-Value="Password" Required="true" RequiredError="Field Password is required." Validation="@(new Func<string, string>(ContainsWhitespace))" />
+    <MudTextField T="string" Label="Password" @bind-Value="Password" Required="true" RequiredError="Field Password is required." Validation="@(new Func<string, string>(ContainsWhitespace))"/>
     <MudTextField T="string" Label="Confirm Password" @bind-Value="Confirm" Required="true" RequiredError="Field Confirm Password is required." Validation="@(new Func<string, string>(IsIdentical))" />
     <MudTextField T="string" Label="Email" @bind-Value="Email" Required="true" RequiredError="Field Email is required." Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid."})" />
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!isValid)" Class="ml-auto" @onclick="HandleSubmit">Register</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!isValid)" Class="ml-auto" @onclick = "HandleSubmit">Register</MudButton>
 </MudForm>
 
 @code {
@@ -51,6 +51,7 @@
     }
     public string IsIdentical(string confirm)
     {
+
         if (String.Equals(confirm, Password))
         {
             return null;
@@ -71,24 +72,24 @@
     {
         StateContainer.OnChange -= StateHasChanged;
     }
-
-    /*public string IsUniqueUsername(string username)
-       {
-       using (var context = _dbFactory.CreateDbContext())
-           {
-           try
-               {
-               if(context.Accounts.All(elem => elem.Username != username))
-                   {
-               return null;
-           }
-           }
-           catch(Exception ex)
-               {
-           Logger.Log(ex);
-           }
-           return "Username is already in use.";
-           }
+    
+     /*public string IsUniqueUsername(string username)
+     {
+        using (var context = _dbFactory.CreateDbContext())
+        {
+            try 
+            {
+                if(context.Accounts.All(elem => elem.Username != username))
+                {
+                    return null;
+                }
+            }
+            catch(Exception ex)
+            {
+                Logger.Log(ex);
+            }
+            return "Username is already in use.";
+        }
     }
     */
 }

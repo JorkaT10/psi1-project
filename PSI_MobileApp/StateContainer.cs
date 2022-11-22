@@ -8,12 +8,6 @@ namespace PSI_MobileApp
         private bool creatingDistributor = false;
         private Profile tempProfile;
         private Account tempAccount;
-        private Account currentAccount = null;
-        public Account CurrentAccount
-        {
-            get { return currentAccount; }
-            set { currentAccount = value; }
-        }
         public bool CreatingDistributor
         {
             get { return creatingDistributor; }

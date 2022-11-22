@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+        <TargetFrameworks>net6.0;net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
         <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
         <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
         <!-- <TargetFrameworks>$(TargetFrameworks);net6.0-tizen</TargetFrameworks> -->
-        <OutputType>Exe</OutputType>
+        <OutputType Condition="'$(TargetFramework)' != 'net6.0'">Exe</OutputType>
         <RootNamespace>PSI_MobileApp</RootNamespace>
         <UseMaui>true</UseMaui>
         <SingleProject>true</SingleProject>
@@ -51,13 +51,14 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="MudBlazor.ThemeManager" Version="1.0.7" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.0">
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="MudBlazor" Version="6.0.18" />
+      <PackageReference Include="MudBlazor" Version="6.1.2" />
       <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
       <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.14" />
       <PackageReference Include="Npgsql" Version="7.0.0" />

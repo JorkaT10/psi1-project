@@ -8,8 +8,11 @@ namespace ClassLibrary
 {
     public struct Address
     {
-        public string city;
-        public string streetName;
-        public int streetNumber;
+        private string city;
+        public string City { get { return city; } set { city = value; } }
+        private string streetName;
+        public string StreetName { get { return streetName; } set { streetName = value; } }
+        private int streetNumber;
+        public int StreetNumber { get { return streetNumber; } set { streetNumber = value; } }
     }
 }

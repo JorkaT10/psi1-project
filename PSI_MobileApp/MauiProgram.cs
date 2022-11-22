@@ -19,7 +19,6 @@ public static class MauiProgram
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 			});
-
 		builder.Services.AddMauiBlazorWebView();
         builder.Services.AddMudServices();
 #if DEBUG
@@ -27,6 +26,9 @@ public static class MauiProgram
 #endif
 		builder.Services.AddSingleton<WeatherForecastService>();
 		builder.Services.AddScoped<StateContainer>();
+		builder.Services.AddScoped<ExceptionLogger>();
+        builder.Services.AddScoped<IdStateContainer>();
+		builder.Services.AddScoped<CurrentUserContainer>();
 		builder.Services.AddDbContextFactory<ProjectDatabaseContext>();
 		return builder.Build();
 	}

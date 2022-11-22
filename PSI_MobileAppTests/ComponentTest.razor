@@ -1,0 +1,16 @@
+﻿@using AngleSharp.Dom
+@using Bunit
+@using PSI_MobileApp
+
+@code{
+    [Fact]
+    public void Sidebar_Navigation_Should_Work()
+    {
+        using var ctx = new TestContext();
+        var cut = ctx.RenderComponent<PSI_MobileApp.Pages.Counter>();
+
+        cut.Find("button").Click();
+
+        Assert.Equal("Clikc me", cut.Find($".btn").TextContent);
+    }
+}
