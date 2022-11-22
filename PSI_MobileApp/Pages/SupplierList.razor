@@ -108,20 +108,20 @@ else
         }
     }
 
-    public List<Profile> Profiles
+    public ObservableCollection<Profile> Profiles
     {
         get; private set;
     }
 
     protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
+        context = new();
         try
         {
             var distrib = await context.Distributors.Select(d => d.Id).ToObservableCollecionAsync();
             Profiles = await context.Profiles.Where(p => distrib.Contains(p.Id)).ToObservableCollecionAsync();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Logger.Log(ex);
         }
@@ -134,7 +134,7 @@ else
 
     public void SearchCommand(string search)
     {
-        SearchResults = (List<Profile>)DataSearch.getSearchResults<Profile>(Profiles, searchQuery: search);
+        SearchResults = DataSearch.getSearchResults<Profile>(Profiles, searchQuery: search);
     }
 
 
@@ -154,8 +154,9 @@ else
     public void Refresh()
     {
         if (context.Database.CanConnect())
-            NavigationManager.NavigateTo("/supplierlist",true);
-        else{
+            NavigationManager.NavigateTo("/supplierlist", true);
+        else
+        {
             canNotConnectText = "Can not connect to database. Please check your internet connection and try again.";
         }
     }

@@ -7,7 +7,7 @@ namespace PSI_MobileApp
     public static class DataSearch
     {
 
-        public static IEnumerable<T> getSearchResults<T>(IEnumerable<T> items,
+        public static ObservableCollection<T> getSearchResults<T>(IEnumerable<T> items,
             string searchQuery = "", Func<T, bool> con = null) where T : Profile
         {
             var searchResult = new ObservableCollection<T>();
