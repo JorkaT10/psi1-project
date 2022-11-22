@@ -4,6 +4,7 @@
 @using ProfileClasses
 @using Microsoft.EntityFrameworkCore
 @inject StateContainer StateContainer
+@inject CurrentUserContainer CurrentUserContainer
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
 
@@ -54,7 +55,7 @@ else
 
         _context = DbFactory.CreateDbContext();
 
-        Profile = _context.Profiles.ToList().First(i => i.Id == StateContainer.CurrentAccount.Id);
+        Profile = _context.Profiles.ToList().First(i => i.Id == CurrentUserContainer.UserId);
         UserReservations = _context.Advertisements.Where(i => i.Buyer == Profile).ToList();
 
         await base.OnInitializedAsync();

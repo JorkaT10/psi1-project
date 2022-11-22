@@ -6,6 +6,7 @@
 @using Microsoft.EntityFrameworkCore
 @inject StateContainer StateContainer
 @inject NavigationManager NavigationManager
+@inject CurrentUserContainer CurrentUserContainer
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
 
@@ -29,9 +30,9 @@ else
 			{
                 <tr>
 					<td @onclick="()=>GoToDetailOnClick(DistributorProfiles.First(i => supplier.Id == i.Id))">@DistributorProfiles.First(i => supplier.Id == i.Id).Name</td>
-					<MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@supplier.Rating></MudRating>
+					<MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(supplier.Rating)></MudRating>
                     <td>
-                        @foreach (var cuisine in supplier.Cuisines)
+                        @foreach (var cuisine in DistributorProfiles.Where(elem => elem.Id == supplier.Id))
                         {
                             @cuisine.ToString()<br>
                         }
@@ -79,7 +80,7 @@ else
 		{
 			StateContainer.OnChange += StateHasChanged;
 
-			Profile = _context.Profiles.ToList().First(i => i.Id == StateContainer.CurrentAccount.Id);
+			Profile = _context.Profiles.ToList().First(i => i.Id == CurrentUserContainer.UserId);
 			DistributorProfiles = _context.Profiles.ToList();
 		}
 		
