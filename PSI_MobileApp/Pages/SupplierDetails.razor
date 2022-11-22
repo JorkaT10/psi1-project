@@ -6,6 +6,7 @@
 @inject IdStateContainer IdContainer
 @inject CurrentUserContainer ProfileContainer
 @inject IDialogService DialogService
+@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @inject ExceptionLogger Logger
 @implements IDisposable
 @try
@@ -131,7 +132,7 @@ else
     {
         try
         {
-            dbContext = new();
+            dbContext = DbFactory.CreateDbContext();
             await RemoveOutOfDate(dbContext);
             profile = await dbContext.Profiles.Where(p => p.Id == IdContainer.Id).FirstOrDefaultAsync();
             try

@@ -1,11 +1,13 @@
 ﻿using ClassLibrary;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using ProfileClasses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace PSI_MobileApp
 {
@@ -32,14 +34,11 @@ namespace PSI_MobileApp
         {
             return _userDistributor.Value;
         }
-        public Account GetAccountFromDB(ExceptionLogger logger)
+        public Account GetAccountFromDB(ExceptionLogger logger, ProjectDatabaseContext context)
         {
             try
             {
-                using (ProjectDatabaseContext context = new())
-                {
-                    return context.Accounts.Where(profile => profile.Id == this.UserId).FirstOrDefault();
-                }
+                return context.Accounts.Where(profile => profile.Id == this.UserId).FirstOrDefault();
             }
             catch(Exception ex)
             {
@@ -48,14 +47,11 @@ namespace PSI_MobileApp
             }
         }
 
-        public Profile GetProfileFromDB(ExceptionLogger logger)
+        public Profile GetProfileFromDB(ExceptionLogger logger, ProjectDatabaseContext context)
         {
             try
             {
-                using (ProjectDatabaseContext context = new())
-                {
-                    return context.Profiles.Where(profile => profile.Id == this.UserId).FirstOrDefault();
-                }
+                return context.Profiles.Where(profile => profile.Id == this.UserId).FirstOrDefault();
             }
             catch(Exception ex)
             {
@@ -63,14 +59,11 @@ namespace PSI_MobileApp
                 return null;
             }
         }
-        public Distributor GetDistributorFromDB(ExceptionLogger logger)
+        public Distributor GetDistributorFromDB(ExceptionLogger logger, ProjectDatabaseContext context)
         {
             try
             {
-                using (ProjectDatabaseContext context = new())
-                {
-                    return context.Distributors.Where(profile => profile.Id == this.UserId).FirstOrDefault();
-                }
+                return context.Distributors.Where(profile => profile.Id == this.UserId).FirstOrDefault();
             }
             catch(Exception ex)
             {
@@ -79,18 +72,18 @@ namespace PSI_MobileApp
             }
         }
 
-        public void Logout(ExceptionLogger logger)
+        public void Logout(ExceptionLogger logger, ProjectDatabaseContext context)
         {
             UserId = null;
-            _userDistributor = new Lazy<Distributor>(delegate () { return GetDistributorFromDB(logger); }); ;
-            _userAccount = new Lazy<Account>(delegate () { return GetAccountFromDB(logger); });
-            _userProfile = new Lazy<Profile>(delegate () { return GetProfileFromDB(logger); });
+            _userDistributor = new Lazy<Distributor>(delegate () { return GetDistributorFromDB(logger, context); });
+            _userAccount = new Lazy<Account>(delegate () { return GetAccountFromDB(logger, context); });
+            _userProfile = new Lazy<Profile>(delegate () { return GetProfileFromDB(logger, context); });
         }
-        public CurrentUserContainer(ExceptionLogger logger)
+        public CurrentUserContainer(ExceptionLogger logger, ProjectDatabaseContext context)
         {
-            this._userAccount = new Lazy<Account>(delegate () { return GetAccountFromDB(logger); });
-            this._userProfile = new Lazy<Profile>(delegate () { return GetProfileFromDB(logger); });
-            this._userDistributor = new Lazy<Distributor>(delegate () { return GetDistributorFromDB(logger); });
+            this._userAccount = new Lazy<Account>(delegate () { return GetAccountFromDB(logger, context); });
+            this._userProfile = new Lazy<Profile>(delegate () { return GetProfileFromDB(logger, context); });
+            this._userDistributor = new Lazy<Distributor>(delegate () { return GetDistributorFromDB(logger, context); });
 
         }
         public event Action? OnChange;

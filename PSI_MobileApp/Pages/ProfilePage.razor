@@ -1,11 +1,14 @@
 ﻿@page "/profile"
 @using AccountDataSerializer
+@using ClassLibrary;
+@using Microsoft.EntityFrameworkCore;
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @inject StateContainer StateContainer
 @inject NavigationManager NavigationManager
 @inject CurrentUserContainer CurrentUserContainer
 @inject ExceptionLogger Logger
+@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
 <h3> </h3>
 @if (CurrentUserContainer.UserId != null)
@@ -31,7 +34,7 @@ else
 
     public void Logout()
     {
-        CurrentUserContainer.Logout(Logger);
+        CurrentUserContainer.Logout(Logger, DbFactory.CreateDbContext());
         NavigationManager.NavigateTo("profile");
     }
 

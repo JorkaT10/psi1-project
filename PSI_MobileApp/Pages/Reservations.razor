@@ -10,7 +10,7 @@
 
 <h3>Reservations</h3>
 
-@if(Profile == null || UserReservations == null)
+@if (CurrentUserContainer.UserId == null || UserReservations == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -39,7 +39,6 @@ else
 
 @code {
 
-    public Profile Profile { get; set; }
     public List<Advertisement> UserReservations { get; set; }
     private ProjectDatabaseContext _context;
 
@@ -55,8 +54,7 @@ else
 
         _context = DbFactory.CreateDbContext();
 
-        Profile = _context.Profiles.ToList().First(i => i.Id == CurrentUserContainer.UserId);
-        UserReservations = _context.Advertisements.Where(i => i.Buyer == Profile).ToList();
+        UserReservations = _context.Advertisements.Where(i => i.Buyer == CurrentUserContainer.GetUserProfile()).ToList();
 
         await base.OnInitializedAsync();
 

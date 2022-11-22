@@ -1,5 +1,6 @@
 ﻿@page "/finishcreation"
 @using AccountDataSerializer
+@using Microsoft.EntityFrameworkCore;
 @using Newtonsoft.Json
 @using ProfileClasses
 @using System.Collections.ObjectModel
@@ -7,6 +8,7 @@
 @inject StateContainer StateContainer
 @inject NavigationManager NavigationManager
 @inject ExceptionLogger Logger
+@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
 @if(Add())
 {
@@ -23,15 +25,16 @@ else
     {
         try
         {
-            using (ProjectDatabaseContext context = new())
+            using (ProjectDatabaseContext context = DbFactory.CreateDbContext())
             {
+
                 context.Add(StateContainer.TempAccount);
                 context.Add(StateContainer.TempProfile);
                 if(StateContainer.CreatingDistributor)
                 {
                     Distributor newDistributor = new();
                     newDistributor.Id = StateContainer.TempAccount.Id;
-                    newDistributor.Rating = 4.9;
+                    newDistributor.Rating = 0;
                     context.Add(newDistributor);
                 }
 

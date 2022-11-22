@@ -80,7 +80,7 @@ else
 		{
 			StateContainer.OnChange += StateHasChanged;
 
-			Profile = _context.Profiles.ToList().First(i => i.Id == CurrentUserContainer.UserId);
+			Profile = CurrentUserContainer.GetUserProfile();
 			DistributorProfiles = _context.Profiles.ToList();
 		}
 		
