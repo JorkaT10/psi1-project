@@ -29,7 +29,7 @@ else
             {
                 <tr>
                     <td>@reservation.MealName</td>
-                    <td>@reservation.Distributor</td>
+                    <td>@GetDistributorName(reservation) </td>
                     <td>@reservation.PickupTimeSpan</td>
                 </tr>
             }
@@ -38,7 +38,6 @@ else
 }
 
 @code {
-
     public List<Advertisement> UserReservations { get; set; }
     private ProjectDatabaseContext _context;
 
@@ -46,6 +45,11 @@ else
     public Reservations()
     {
 
+    }
+
+    public string GetDistributorName(Advertisement adv)
+    {
+        return _context.Profiles.Where(elem => adv.Distributor.Id == elem.Id).Select(elem => elem.Name).FirstOrDefault();
     }
 
     protected override async Task OnInitializedAsync()

@@ -184,3 +184,9 @@ POSITION: 233    at Npgsql.Internal.NpgsqlConnector.<ReadMessage>g__ReadMessageL
    at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
    at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToArrayAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
    at PSI_MobileApp.Pages.SupplierDetails.ServerReload(TableState state)
+2022-11-23 00:31:06
+Exception System.InvalidOperationException thrown: An exception has been raised that is likely due to a transient failure.    at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at PSI_MobileApp.Extensions.EntityFrameworkQueryableExtensions.ToObservableCollecionAsync[T](IQueryable`1 source, CancellationToken cancellationToken)
+   at PSI_MobileApp.Extensions.EntityFrameworkQueryableExtensions.ToObservableCollecionAsync[T](IQueryable`1 source, CancellationToken cancellationToken)
+   at PSI_MobileApp.Pages.SupplierList.OnInitializedAsync()
