@@ -1,11 +1,13 @@
 ﻿@page "/reservations"
 @using System.Collections.ObjectModel;
 @using ClassLibrary
+@using PSI_MobileApp.Extensions;
 @using ProfileClasses
 @using Microsoft.EntityFrameworkCore
 @inject StateContainer StateContainer
 @inject CurrentUserContainer CurrentUserContainer
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
+@inject ExceptionLogger Logger
 @implements IDisposable
 
 <h3>Reservations</h3>
@@ -38,9 +40,8 @@ else
 }
 
 @code {
-    public List<Advertisement> UserReservations { get; set; }
+    public ObservableCollection<Advertisement> UserReservations { get; set; }
     private ProjectDatabaseContext _context;
-
 
     public Reservations()
     {
@@ -49,23 +50,34 @@ else
 
     public string GetDistributorName(Advertisement adv)
     {
-        return _context.Profiles.Where(elem => adv.Distributor.Id == elem.Id).Select(elem => elem.Name).FirstOrDefault();
+        try
+        {
+            return _context.Profiles.Where(elem => elem.Id == adv.Distributor.Id).FirstOrDefault().Name;
+        }
+        catch(Exception ex)
+        {
+            Logger.Log(ex);
+            return null;
+        }
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         StateContainer.OnChange += StateHasChanged;
-
         _context = DbFactory.CreateDbContext();
-
-        UserReservations = _context.Advertisements.Where(i => i.Buyer == CurrentUserContainer.GetUserProfile()).ToList();
-
-        await base.OnInitializedAsync();
-
-    }
+        try
+        {
+            UserReservations = _context.Advertisements.Include("Buyer").Include("Distributor").Where(i => i.Buyer.Id == CurrentUserContainer.UserId).ToObservableCollection();
+        }
+        catch (Exception ex)
+        {
+            Logger.Log(ex);
+        }
+}
     public void Dispose()
     {
         StateContainer.OnChange -= StateHasChanged;
+        _context.Dispose();
     }
 
 }

@@ -8,6 +8,7 @@
 @inject NavigationManager NavigationManager
 @inject CurrentUserContainer CurrentUserContainer
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
+@inject ExceptionLogger Logger
 @implements IDisposable
 
 <h3>Subscriptions</h3>
@@ -22,23 +23,30 @@ else
 			<tr>
 				<th>Name</th>
 				<th>Rating</th>
-                <th>Cuisines</th>
+				<th>Cuisines</th>
 			</tr>
 		</thead>
 		<tbody>
-			@foreach (var supplier in Profile.Subscriptions)
+			@try
 			{
-                <tr>
-					<td @onclick="()=>GoToDetailOnClick(DistributorProfiles.First(i => supplier.Id == i.Id))">@DistributorProfiles.First(i => supplier.Id == i.Id).Name</td>
-					<MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(supplier.Rating)></MudRating>
-                    <td>
-                        @foreach (var cuisine in DistributorProfiles.Where(elem => elem.Id == supplier.Id))
-                        {
-                            @cuisine.ToString()<br>
-                        }
-                    </td>
-					<MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(supplier)">Unsubscribe</MudButton>
-				</tr>
+				@foreach (var supplier in Profile.Subscriptions)
+				{
+					<tr>
+						<td @onclick="()=>GoToDetailOnClick(DistributorProfiles.First(i => supplier.Id == i.Id))">@DistributorProfiles.First(i => supplier.Id == i.Id).Name</td>
+						<MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(supplier.Rating)></MudRating>
+						<td>
+							@foreach (var cuisine in DistributorProfiles.Where(elem => elem.Id == supplier.Id))
+							{
+								@cuisine.ToString()<br>
+							}
+						</td>
+						<MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(supplier)">Unsubscribe</MudButton>
+					</tr>
+				}
+			}
+			catch(Exception ex)
+			{
+				Logger.Log(ex);
 			}
 		</tbody>
 	</table>
@@ -62,6 +70,7 @@ else
 
 	public void ChangeSubscriptionStatus(Distributor distributor)
 	{
+
 		if (!Profile.Subscriptions.Contains(distributor))
 		{
 			Profile.Subscriptions.Add(distributor);
@@ -74,17 +83,24 @@ else
 
 	protected override async Task OnInitializedAsync()
 	{
-		_context = DbFactory.CreateDbContext();
-
-		if(_context != null && _context.Profiles != null)
+		try
 		{
-			StateContainer.OnChange += StateHasChanged;
+			_context = DbFactory.CreateDbContext();
 
-			Profile = CurrentUserContainer.GetUserProfile();
-			DistributorProfiles = _context.Profiles.ToList();
+			if (_context != null && _context.Profiles != null)
+			{
+				StateContainer.OnChange += StateHasChanged;
+
+				Profile = CurrentUserContainer.GetUserProfile();
+				DistributorProfiles = _context.Profiles.ToList();
+			}
+
+			await base.OnInitializedAsync();
 		}
-		
-		await base.OnInitializedAsync();
+		catch(Exception ex)
+		{
+			Logger.Log(ex);
+		}
 	}
 	public void Dispose()
 	{

@@ -27,7 +27,8 @@ namespace PSI_MobileApp
 
         public void Dispose()
         {
-            fileStream.Close();
+            if(fileStream!=null)
+                fileStream.Close();
         }
 
         public void Log(Exception ex)

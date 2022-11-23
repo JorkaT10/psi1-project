@@ -199,7 +199,7 @@ else
         {
             Logger.Log(ex);
         }
-        
+
     }
 
     private void RowClickEvent(TableRowClickEventArgs<Advertisement> tableRowClickEventArgs)
@@ -260,12 +260,13 @@ else
         {
             Logger.Log(ex);
         }
-        
+
     }
 
     public void Dispose()
     {
         IdContainer.OnChange -= StateHasChanged;
+        dbContext.Dispose();
     }
 
     private string HandleTime(DateTime time)
