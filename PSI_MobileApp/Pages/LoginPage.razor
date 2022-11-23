@@ -58,7 +58,7 @@
         {
             Logger.Log(ex);
         }
-        if(CurrentUserContainer.UserId != null){
+        if(CurrentUserContainer.UserId != Guid.Empty){
             NavigationManager.NavigateTo("");
         }
         

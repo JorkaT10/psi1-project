@@ -7,7 +7,7 @@ namespace ClassLibrary
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Server=localhost;Database=postgres;Port=5432;User Id=postgres;Password=postgrepw");
+            optionsBuilder.UseNpgsql("Server=localhost;Port=49153;Database=MyTestServer;Uid=postgres;Pwd=postgrespw;");
         }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Profile> Profiles { get; set; }
