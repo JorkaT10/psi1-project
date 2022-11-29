@@ -17,9 +17,15 @@
 else
 {
     <h3> Profile creation failed unexpectedly.</h3>
+    <MudButton @OnClick="Reload"></MudButton>
 }
 
 @code {
+
+    public void Reload()
+    {
+        NavigationManager.NavigateTo("finishcreation");
+    }
 
     public bool Add()
     {

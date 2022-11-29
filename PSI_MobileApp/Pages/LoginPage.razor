@@ -11,40 +11,18 @@
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
 <h3> Login </h3>
- <form>
-    <table>
-        <tr>
-            <td class="labelcell">
-                <div class="label">
-                    <label for="username"> Username:</label>
-                </div>
-            </td>
-            <td>
-                <input type="text" @bind-value="Username" id="username" name="name">
-            </td>
-        </tr>
-        <tr>
-            <td class="labelcell">
-                <div class="label">
-                    <label for="password"> Password: </label>
-                </div>
-            </td>
-            <td>
-                <input type="text" @bind-value="Password" id="password" name="pass">
-            </td>
-
-        </tr>
-
-    </table>
+<MudForm @bind-isValid = "@isValid">
+    <MudTextField T="string" Label="Username" @bind-Value="Username" Required="true" RequiredError="Field Username is required."/>
+    <MudTextField T="string" Label="Password" @bind-Value="Password" Required="true" RequiredError="Field Password is required." />
     <MudButton OnClick="HandleValidSubmit" Variant="Variant.Filled"> Login </MudButton>
- </form>
+ </MudForm>
 
 
 
 @code {
     public string Username;
     public string Password;
-
+    public bool isValid = true;
     public void HandleValidSubmit()
     {
         try
@@ -58,10 +36,14 @@
         {
             Logger.Log(ex);
         }
-        if(CurrentUserContainer.UserId != null){
+        if ((CurrentUserContainer.UserId != null) && (CurrentUserContainer.UserId != Guid.Empty))
+        {
             NavigationManager.NavigateTo("");
         }
-        
+        else {
+            isValid = false;
+        }
+
     }
 
     public void Dispose()
