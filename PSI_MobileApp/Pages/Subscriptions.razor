@@ -15,7 +15,7 @@
 @implements IDisposable
 
 <h3>Subscriptions</h3>
-@if (Profile == null)
+@if (Profile == null || Profile.Subscriptions == null)
 {
 	<p><em>Loading...</em></p>
 }
@@ -32,13 +32,13 @@ else
 		<tbody>
 			@try
 			{
-				@foreach (var supplier in _context.Profiles.Include("Subscriptions").First(i => i.Id == Profile.Id).Subscriptions)
+				@foreach (var supplier in Profile.Subscriptions)
 				{
 					<tr>
 						<td @onclick="()=>GoToDetailOnClick(DistributorProfiles.First(i => supplier.Id == i.Id))">@DistributorProfiles.First(i => supplier.Id == i.Id).Name</td>
 						<MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(supplier.Rating)></MudRating>
 						<td>
-							@foreach (var cuisine in DistributorProfiles.Where(elem => elem.Id == supplier.Id))
+							@foreach (var cuisine in DistributorProfiles.First(i => supplier.Id == i.Id).CuisineArray)
 							{
 								@cuisine.ToString()<br>
 							}
@@ -65,18 +65,18 @@ else
 		StateContainer.OnChange += StateHasChanged;
 		StateContainer.Supplier = supplier;
 		IdContainer.Id = supplier.Id;
-		NavigationManager.NavigateTo("/supplierdetails");
+		NavigationManager.NavigateTo("/../supplierdetails");
 	}
 
 	public void ChangeSubscriptionStatus(Distributor distributor)
 	{
-		if (_context.Profiles.Include("Subscriptions").First(i => i.Id == Profile.Id).Subscriptions.Contains(distributor))
+		if (Profile.Subscriptions.Contains(distributor))
 		{
-			_context.Profiles.Include("Subscriptions").First(i => i.Id == Profile.Id).Subscriptions.Remove(distributor);
+			Profile.Subscriptions.Remove(distributor);
 		}
 		else
 		{
-			_context.Profiles.Include("Subscriptions").First(i => i.Id == Profile.Id).Subscriptions.Add(distributor);
+			Profile.Subscriptions.Add(distributor);
 		}
 		_context.SaveChanges();
 	}
@@ -91,7 +91,7 @@ else
 			{
 				StateContainer.OnChange += StateHasChanged;
 
-				Profile = CurrentUserContainer.GetUserProfile();
+				Profile = CurrentUserContainer.GetProfileFromDB(Logger, _context);
 				DistributorProfiles = _context.Profiles.ToList();
 			}
 

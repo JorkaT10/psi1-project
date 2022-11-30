@@ -5,6 +5,7 @@
 @using PSI_MobileApp.Extensions
 @using ProfileClasses
 @using System.Collections.ObjectModel
+@using System.Diagnostics;
 @inject StateContainer StateContainer
 @inject IdStateContainer IdContainer
 @inject CurrentUserContainer CurrentUserContainer
@@ -16,7 +17,7 @@
 
 <h3>Supplier List</h3>
 
-@if (Profiles == null || Profile.Subscriptions == null)
+@if (Profiles == null @*|| Profile == null*@ @*|| Profile.Subscriptions == null*@)
 { 
     
     <div>
@@ -70,14 +71,8 @@ else
                 
                 <tr @onclick="()=>GoToDetailOnClick(supplier)">
                     <td>@supplier.Name</td>
-                    @try
-                    {
-                        <td>@(context.Distributors.Where(d => d.Id == supplier.Id).FirstOrDefault().Rating)</td>
-                    }
-					catch(Exception ex)
-                    {
-                        Logger.Log(ex);
-                    }
+                    <MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(
+                        context.Distributors.Where(d => d.Id == supplier.Id).FirstOrDefault().Rating)></MudRating>
 					<td>@supplier.PhoneNumber</td>
                     <td>
                         @foreach (var cuisine in supplier.CuisineArray)
@@ -86,13 +81,17 @@ else
                         }
                     </td>
 
-                    @if (context.Profiles.Include("Subscriptions").First(i => i.Id == Profile.Id).Subscriptions.Contains(Distributors.First(d => d.Id == supplier.Id)))
+                    @if(Profile != null && Profile.Subscriptions != null)
                     {
-                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(context.Distributors.First(d => d.Id == supplier.Id))">Unsubscribe</MudButton>
-                    }else
-                    {
-                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(context.Distributors.First(d => d.Id == supplier.Id))">Subscribe</MudButton>
+                        @if (Profile.Subscriptions.Contains(Distributors.First(d => d.Id == supplier.Id)))
+                        {
+                            <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(context.Distributors.First(d => d.Id == supplier.Id))">Unsubscribe</MudButton>
+                        }else
+                        {
+                            <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(context.Distributors.First(d => d.Id == supplier.Id))">Subscribe</MudButton>
+                        }   
                     }
+                    
                     
 				</tr>
 			}
@@ -135,7 +134,7 @@ else
             Distributors = await context.Distributors.Include("Subscribers").ToObservableCollectionAsync();
 
             StateContainer.OnChange += StateHasChanged;
-            Profile = CurrentUserContainer.GetUserProfile();
+            Profile = CurrentUserContainer.GetProfileFromDB(Logger, context);
 
             SearchResults = Profiles;
 
@@ -165,12 +164,12 @@ else
 
     public void ChangeSubscriptionStatus(Distributor distributor)
     {
-        if (context.Profiles.Include("Subscriptions").First(i => i.Id == Profile.Id).Subscriptions.Contains(distributor))
+        if (Profile.Subscriptions.Contains(distributor))
         {
-            context.Profiles.Include("Subscriptions").First(i => i.Id == Profile.Id).Subscriptions.Remove(distributor);
+            Profile.Subscriptions.Remove(distributor);
         }else
         {
-            context.Profiles.Include("Subscriptions").First(i => i.Id == Profile.Id).Subscriptions.Add(distributor);
+            Profile.Subscriptions.Add(distributor);
         }
         context.SaveChanges();
     }
@@ -178,8 +177,13 @@ else
     public void Dispose()
     {
         context.SaveChanges();
+        if(Profile == null)
+        {
+            CurrentUserContainer.Logout(Logger, context);
+        }
         StateContainer.OnChange -= StateHasChanged;
         context.Dispose();
+
     }
 
     public void Refresh()
