@@ -19,7 +19,7 @@
 
 			<MudMenu>
 				<ActivatorContent>
-					<MudAvatar @ref="avatar"> @Asd() </MudAvatar>
+					<MudAvatar @ref="avatar"> @AddLetter() </MudAvatar>
 				</ActivatorContent>
 				<ChildContent>
 					@if(container.UserId != null)
@@ -58,7 +58,7 @@
 	{
 		NavigationManager.NavigateTo("chooseaccounttype");
 	}
-	public String Asd()
+	public String AddLetter()
 	{
 		if((container.UserId != null) && (container.UserId != Guid.Empty))
 		{
