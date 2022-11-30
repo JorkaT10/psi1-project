@@ -57,7 +57,7 @@ namespace ClassLibrary.Migrations
 
                     b.HasIndex("DistributorId");
 
-                    b.ToTable("Advertisements");
+                    b.ToTable("Advertisements", (string)null);
                 });
 
             modelBuilder.Entity("DistributorProfile", b =>
@@ -72,7 +72,7 @@ namespace ClassLibrary.Migrations
 
                     b.HasIndex("SubscriptionsId");
 
-                    b.ToTable("DistributorProfile");
+                    b.ToTable("DistributorProfile", (string)null);
                 });
 
             modelBuilder.Entity("ProfileClasses.Account", b =>
@@ -91,7 +91,7 @@ namespace ClassLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Accounts");
+                    b.ToTable("Accounts", (string)null);
                 });
 
             modelBuilder.Entity("ProfileClasses.Distributor", b =>
@@ -108,7 +108,7 @@ namespace ClassLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Distributors");
+                    b.ToTable("Distributors", (string)null);
                 });
 
             modelBuilder.Entity("ProfileClasses.Profile", b =>
@@ -138,7 +138,7 @@ namespace ClassLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Profiles");
+                    b.ToTable("Profiles", (string)null);
                 });
 
             modelBuilder.Entity("ClassLibrary.Advertisement", b =>

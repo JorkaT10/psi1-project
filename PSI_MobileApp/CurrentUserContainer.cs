@@ -38,7 +38,7 @@ namespace PSI_MobileApp
         {
             try
             {
-                return context.Accounts.Where(profile => profile.Id == this.UserId).FirstOrDefault();
+                return context.Accounts.FirstOrDefault(profile => profile.Id == this.UserId);
             }
             catch(Exception ex)
             {
@@ -51,7 +51,7 @@ namespace PSI_MobileApp
         {
             try
             {
-                return context.Profiles.Where(profile => profile.Id == this.UserId).FirstOrDefault();
+                return context.Profiles.Include("Subscriptions").FirstOrDefault(profile => profile.Id == this.UserId);
             }
             catch(Exception ex)
             {
@@ -63,7 +63,7 @@ namespace PSI_MobileApp
         {
             try
             {
-                return context.Distributors.Where(profile => profile.Id == this.UserId).FirstOrDefault();
+                return context.Distributors.FirstOrDefault(profile => profile.Id == this.UserId);
             }
             catch(Exception ex)
             {

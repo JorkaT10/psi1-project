@@ -7,6 +7,7 @@
 @using System.Collections.ObjectModel
 @inject StateContainer StateContainer
 @inject IdStateContainer IdContainer
+@inject CurrentUserContainer CurrentUserContainer
 @inject NavigationManager NavigationManager
 @inject ExceptionLogger Logger
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
@@ -15,7 +16,7 @@
 
 <h3>Supplier List</h3>
 
-@if (Profiles == null)
+@if (Profiles == null || Profile.Subscriptions == null)
 { 
     
     <div>
@@ -84,6 +85,15 @@ else
                             @cuisine<br>
                         }
                     </td>
+
+                    @if (context.Profiles.Include("Subscriptions").First(i => i.Id == Profile.Id).Subscriptions.Contains(Distributors.First(d => d.Id == supplier.Id)))
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(context.Distributors.First(d => d.Id == supplier.Id))">Unsubscribe</MudButton>
+                    }else
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(context.Distributors.First(d => d.Id == supplier.Id))">Subscribe</MudButton>
+                    }
+                    
 				</tr>
 			}
 		</tbody>
@@ -95,6 +105,8 @@ else
     private ObservableCollection<Profile> _searchResult;
     ProjectDatabaseContext context;
     private string canNotConnectText = string.Empty;
+    public Profile Profile { get; set; }
+    public ObservableCollection<Distributor> Distributors { get; set; }
     public ObservableCollection<Profile> SearchResults
     {
         get
@@ -114,18 +126,25 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
         try
         {
-            var distrib = await context.Distributors.Select(d => d.Id).ToObservableCollecionAsync();
-            Profiles = await context.Profiles.Where(p => distrib.Contains(p.Id)).ToObservableCollecionAsync();
+            context = DbFactory.CreateDbContext();
+
+            var distrib = await context.Distributors.Select(d => d.Id).ToObservableCollectionAsync();
+            Profiles = await context.Profiles.Where(p => distrib.Contains(p.Id)).ToObservableCollectionAsync();
+            Distributors = await context.Distributors.Include("Subscribers").ToObservableCollectionAsync();
+
+            StateContainer.OnChange += StateHasChanged;
+            Profile = CurrentUserContainer.GetUserProfile();
+
+            SearchResults = Profiles;
+
+            await base.OnInitializedAsync();
         }
         catch (Exception ex)
         {
             Logger.Log(ex);
         }
-        SearchResults = Profiles;
-        StateContainer.OnChange += StateHasChanged;
     }
 
 
@@ -141,11 +160,24 @@ else
     {
         IdContainer.OnChange += StateHasChanged;
         IdContainer.Id = profile.Id;
-        NavigationManager.NavigateTo("/supplierlist/supplierdetails");
+        NavigationManager.NavigateTo("/supplierdetails");
+    }
+
+    public void ChangeSubscriptionStatus(Distributor distributor)
+    {
+        if (context.Profiles.Include("Subscriptions").First(i => i.Id == Profile.Id).Subscriptions.Contains(distributor))
+        {
+            context.Profiles.Include("Subscriptions").First(i => i.Id == Profile.Id).Subscriptions.Remove(distributor);
+        }else
+        {
+            context.Profiles.Include("Subscriptions").First(i => i.Id == Profile.Id).Subscriptions.Add(distributor);
+        }
+        context.SaveChanges();
     }
 
     public void Dispose()
     {
+        context.SaveChanges();
         StateContainer.OnChange -= StateHasChanged;
         context.Dispose();
     }
