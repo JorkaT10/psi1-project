@@ -35,7 +35,7 @@
     private string TimeCorrect { get; set; } = string.Empty;
     public IEnumerable<string> cuisines { get; set; } = new HashSet<string>() { };
     public string[] Kitchens = (Enum.GetNames(typeof(Cuisines))).SkipLast(1).ToArray();
-    public DateTime? PickUpDate { get; set; }
+    public DateTime? PickUpDate { get; set; } = DateTime.Now.Date;
     public TimeSpan? TimeSpan { get; set; }
 
 
