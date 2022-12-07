@@ -79,6 +79,11 @@ namespace PSI_MobileApp
             _userAccount = new Lazy<Account>(delegate () { return GetAccountFromDB(logger, context); });
             _userProfile = new Lazy<Profile>(delegate () { return GetProfileFromDB(logger, context); });
         }
+        public void RefreshProfile(ExceptionLogger logger, ProjectDatabaseContext context)
+        {
+            _userProfile = new Lazy<Profile>(delegate () { return GetProfileFromDB(logger, context); });
+        }
+
         public CurrentUserContainer(ExceptionLogger logger, ProjectDatabaseContext context)
         {
             this._userAccount = new Lazy<Account>(delegate () { return GetAccountFromDB(logger, context); });

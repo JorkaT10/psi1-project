@@ -13,7 +13,22 @@
 <h3> </h3>
 @if (CurrentUserContainer.UserId != null)
 {
-    <h3> Test </h3>
+    <h3> Profile Page </h3>
+    <h2> @CurrentUserContainer.GetUserProfile().Name; </h2>
+    <MudText>Email: @CurrentUserContainer.GetUserProfile().Email;</MudText>
+    <MudText>Address: @CurrentUserContainer.GetUserProfile().TypedAddress.City, @CurrentUserContainer.GetUserProfile().TypedAddress.StreetName st. @CurrentUserContainer.GetUserProfile().TypedAddress.StreetNumber;</MudText>
+    <MudText>Phone Number: @CurrentUserContainer.GetUserProfile().PhoneNumber;</MudText>
+    <MudText>Cuisines:         
+        @foreach (var cuisine in CurrentUserContainer.GetUserProfile().CuisineArray)
+        {
+            var last = CurrentUserContainer.GetUserProfile().CuisineArray.LastOrDefault();
+            if (cuisine != last)
+                @(cuisine + ", ")
+            else
+                @cuisine
+        };
+    </MudText>
+    <MudButton @onclick = "ChangeContactInfo">Change Contact Info</MudButton>
     <MudButton @onclick = "Logout">Logout</MudButton>
 }
 else
@@ -36,6 +51,12 @@ else
     {
         CurrentUserContainer.Logout(Logger, DbFactory.CreateDbContext());
         NavigationManager.NavigateTo("profile");
+    }
+
+    public void ChangeContactInfo()
+    {
+        StateContainer.CreatingDistributor = false;
+        NavigationManager.NavigateTo("inputcontactdata");
     }
 
     public void Login()

@@ -13,7 +13,7 @@
 <h3> Login </h3>
 <MudForm @bind-isValid = "@isValid">
     <MudTextField T="string" Label="Username" @bind-Value="Username" Required="true" RequiredError="Field Username is required."/>
-    <MudTextField T="string" Label="Password" @bind-Value="Password" Required="true" RequiredError="Field Password is required." />
+    <MudTextField T="string" Label="Password" @bind-Value="Password" Required="true" RequiredError="Field Password is required." InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
     <MudButton OnClick="HandleValidSubmit" Variant="Variant.Filled"> Login </MudButton>
  </MudForm>
 
@@ -22,7 +22,25 @@
 @code {
     public string Username;
     public string Password;
+    public InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+    bool isShow;
     public bool isValid = true;
+    void ButtonTestclick()
+    {
+        @if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
     public void HandleValidSubmit()
     {
         try
