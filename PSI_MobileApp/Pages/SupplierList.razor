@@ -2,9 +2,13 @@
 @using AccountDataSerializer
 @using ClassLibrary
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.Storage;
+@using Npgsql;
 @using PSI_MobileApp.Extensions
 @using ProfileClasses
 @using System.Collections.ObjectModel
+@using System.Net.NetworkInformation
+
 @inject StateContainer StateContainer
 @inject IdStateContainer IdContainer
 @inject NavigationManager NavigationManager
@@ -15,7 +19,7 @@
 
 <h3>Supplier List</h3>
 
-@if (Profiles == null)
+@if (!connected || (Profiles == null) || (Distributors == null))
 { 
     
     <div>
@@ -38,10 +42,11 @@
     <MudOverlay Visible="true" DarkBackground="true" Absolute="true" >
         <MudStack AlignItems="AlignItems.Center">
             <MudProgressCircular Color="Color.Default" Indeterminate="true"/>
-            <MudText>An error has occured while loading data.</MudText>
+            <MudText>Loading...</MudText>
+            <MudText>@errorOccured</MudText>
             <MudText>@canNotConnectText</MudText>
             <MudButton Variant="Variant.Outlined" OnClick="Refresh">Refresh</MudButton>
-       </MudStack>
+        </MudStack>
         
     </MudOverlay>
     
@@ -50,8 +55,8 @@ else
 {
     <div>
         <input class="form-control" type="text" placeholder="Search"
-               @bind="Search"
-               @oninput="(e) =>  SearchCommand(e.Value.ToString())" />
+                @bind="Search"
+                @oninput="(e) =>  SearchCommand(e.Value.ToString())" />
     </div>
 
 	<table class="table">
@@ -64,37 +69,38 @@ else
 			</tr>
 		</thead>
 		<tbody>
-			@foreach (var supplier in SearchResults)
+            @if (SearchResults != null)
 			{
+                foreach (var supplier in SearchResults)
+			    {
                 
-                <tr @onclick="()=>GoToDetailOnClick(supplier)">
-                    <td>@supplier.Name</td>
-                    @try
-                    {
-                        <td>@(context.Distributors.Where(d => d.Id == supplier.Id).FirstOrDefault().Rating)</td>
-                    }
-					catch(Exception ex)
-                    {
-                        Logger.Log(ex);
-                    }
-					<td>@supplier.PhoneNumber</td>
-                    <td>
-                        @foreach (var cuisine in supplier.CuisineArray)
-                        {
-                            @cuisine<br>
-                        }
-                    </td>
-				</tr>
-			}
+                    <tr @onclick="()=>GoToDetailOnClick(supplier)">
+                        <td>@supplier.Name</td>
+                       
+                        <td>@(Distributors.Where(d => d.Id == supplier.Id).FirstOrDefault().Rating)</td>
+                        
+					    <td>@supplier.PhoneNumber</td>
+                        <td>
+                            @foreach (var cuisine in supplier.CuisineArray)
+                            {
+                                @cuisine<br>
+                            }
+                        </td>
+				    </tr>
+			    }
+            }
 		</tbody>
-	</table>
+    </table>
 }
+
 
 @code {
     // private AccountDataSerializer<Profile> _dataSerializer;
     private ObservableCollection<Profile> _searchResult;
     ProjectDatabaseContext context;
     private string canNotConnectText = string.Empty;
+    private string errorOccured = string.Empty;
+    private bool connected;
     public ObservableCollection<Profile> SearchResults
     {
         get
@@ -107,6 +113,11 @@ else
         }
     }
 
+    public ObservableCollection<Distributor> Distributors
+    {
+        get; private set;
+    }
+
     public ObservableCollection<Profile> Profiles
     {
         get; private set;
@@ -115,16 +126,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         context = DbFactory.CreateDbContext();
-        try
-        {
-            var distrib = await context.Distributors.Select(d => d.Id).ToObservableCollecionAsync();
-            Profiles = await context.Profiles.Where(p => distrib.Contains(p.Id)).ToObservableCollecionAsync();
-        }
-        catch (Exception ex)
-        {
-            Logger.Log(ex);
-        }
-        SearchResults = Profiles;
+        ActivateTestConnection();
         StateContainer.OnChange += StateHasChanged;
     }
 
@@ -159,4 +161,57 @@ else
             canNotConnectText = "Can not connect to database. Please check your internet connection and try again.";
         }
     }
+
+
+    async void ActivateTestConnection()
+    {
+        await Task.Run(async () =>
+        {
+            while (true)
+            {
+                connected = await TestConnection();
+                if (connected)
+                    await GetDBData();
+                else
+                    errorOccured = "A network error occured. Please try again.";
+                await InvokeAsync(StateHasChanged);
+                await Task.Delay(10000);
+            }
+        });
+    }
+
+    async Task GetDBData()
+    {
+        try
+        {
+            var distrib = await context.Distributors.Select(d => d.Id).ToObservableCollecionAsync();
+            Profiles = await context.Profiles.Where(p => distrib.Contains(p.Id)).ToObservableCollecionAsync();
+            Distributors = await context.Distributors.ToObservableCollecionAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.Log(ex);
+        }
+        SearchResults = Profiles;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task<bool> TestConnection()
+    {
+        await using (NpgsqlConnection conn = new NpgsqlConnection("Server=host.docker.internal;Port=49172;Database=pg;Uid=postgres;Pwd=postgrespw;"))
+        {
+            try
+            { 
+                await conn.OpenAsync();
+                var connected = (conn.State == System.Data.ConnectionState.Open);
+                await conn.CloseAsync();
+                return connected;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+
 }
