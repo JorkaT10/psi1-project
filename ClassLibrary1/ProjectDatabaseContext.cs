@@ -9,6 +9,10 @@ namespace ClassLibrary
         {
             optionsBuilder.UseNpgsql("Server=localhost;Database=postgres;Port=5432;User Id=postgres;Password=postgrepw");
         }
+        public ProjectDatabaseContext(DbContextOptions<ProjectDatabaseContext> context) : base()
+        {
+
+        }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Profile> Profiles { get; set; }
         public DbSet<Distributor> Distributors { get; set; }

@@ -2,26 +2,28 @@
 @using AccountDataSerializer
 @using ClassLibrary;
 @using Microsoft.EntityFrameworkCore;
+@using PSI_MobileApp.DataServices;
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @inject StateContainer StateContainer
 @inject NavigationManager NavigationManager
+@inject IGetData data
 @inject CurrentUserContainer CurrentUserContainer
 @inject ExceptionLogger Logger
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
 <h3> </h3>
-@if (CurrentUserContainer.UserId != null)
+@if (profile != null)
 {
     <h3> Profile Page </h3>
-    <h2> @CurrentUserContainer.GetUserProfile().Name; </h2>
-    <MudText>Email: @CurrentUserContainer.GetUserProfile().Email;</MudText>
-    <MudText>Address: @CurrentUserContainer.GetUserProfile().TypedAddress.City, @CurrentUserContainer.GetUserProfile().TypedAddress.StreetName st. @CurrentUserContainer.GetUserProfile().TypedAddress.StreetNumber;</MudText>
-    <MudText>Phone Number: @CurrentUserContainer.GetUserProfile().PhoneNumber;</MudText>
-    <MudText>Cuisines:         
-        @foreach (var cuisine in CurrentUserContainer.GetUserProfile().CuisineArray)
+    <h2> @profile.Name; </h2>
+    <MudText>Email: @profile.Email;</MudText>
+    <MudText>Address: @profile.TypedAddress.City, @profile.TypedAddress.StreetName st. @profile.TypedAddress.StreetNumber;</MudText>
+    <MudText>Phone Number: @profile.PhoneNumber;</MudText>
+    <MudText>Cuisines:
+        @foreach (var cuisine in profile.CuisineArray)
         {
-            var last = CurrentUserContainer.GetUserProfile().CuisineArray.LastOrDefault();
+            var last = profile.CuisineArray.LastOrDefault();
             if (cuisine != last)
                 @(cuisine + ", ")
             else
@@ -40,6 +42,7 @@ else
 
 
 @code {
+    public Profile profile;
     public void Register()
     {
         NavigationManager.NavigateTo("chooseaccounttype");
@@ -63,7 +66,11 @@ else
     {
         NavigationManager.NavigateTo("login");
     }
-
+    protected override async Task OnInitializedAsync()
+    {
+        var profileList = await data.GetAllProfiles();
+        profile = profileList.Where(p => p.Id == CurrentUserContainer.UserId).FirstOrDefault();
+    }   
     public void Dispose()
     {
         StateContainer.OnChange -= StateHasChanged;

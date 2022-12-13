@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
 using PSI_MobileApp.Data;
+using PSI_MobileApp.DataServices;
 using PSI_MobileApp.Pages;
 
 namespace PSI_MobileApp;
@@ -29,6 +30,7 @@ public static class MauiProgram
 		builder.Services.AddScoped<ExceptionLogger>();
         builder.Services.AddScoped<IdStateContainer>();
 		builder.Services.AddScoped<CurrentUserContainer>();
+		builder.Services.AddSingleton<IGetData, GetData>();
 		builder.Services.AddDbContextFactory<ProjectDatabaseContext>();
 		return builder.Build();
 	}
