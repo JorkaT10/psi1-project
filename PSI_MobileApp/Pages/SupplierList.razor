@@ -171,16 +171,16 @@ else
         {
             Profile.Subscriptions.Add(distributor);
         }
-        context.SaveChanges();
+        //context.SaveChanges();
     }
 
     public void Dispose()
     {
         context.SaveChanges();
-        if(Profile == null)
-        {
-            CurrentUserContainer.Logout(Logger, context);
-        }
+        //if(Profile == null)
+        //{
+        //    CurrentUserContainer.Logout(Logger, context);
+        //}
         StateContainer.OnChange -= StateHasChanged;
         context.Dispose();
 
