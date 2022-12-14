@@ -33,11 +33,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.UseExceptionHandler("/Error");
 app.MapControllers();
-app.MapGet("api/test", async (ClassLibrary.ProjectDatabaseContext context) =>
-{
-    var items = await context.Profiles.ToListAsync();
-
-    return Results.Ok(items);
-});
 
 app.Run();

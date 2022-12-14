@@ -2,9 +2,11 @@
 @using AccountDataSerializer
 @using ClassLibrary
 @using Microsoft.EntityFrameworkCore
+@using PSI_MobileApp.DataServices;
 @using PSI_MobileApp.Extensions
 @using ProfileClasses
 @using System.Collections.ObjectModel
+@inject IGetData data
 @inject StateContainer StateContainer
 @inject IdStateContainer IdContainer
 @inject NavigationManager NavigationManager
@@ -69,14 +71,7 @@ else
                 
                 <tr @onclick="()=>GoToDetailOnClick(supplier)">
                     <td>@supplier.Name</td>
-                    @try
-                    {
-                        <td>@(context.Distributors.Where(d => d.Id == supplier.Id).FirstOrDefault().Rating)</td>
-                    }
-					catch(Exception ex)
-                    {
-                        Logger.Log(ex);
-                    }
+                    <td>@(data.GetDistributorsByIdConcurrent(supplier.Id).Rating)</td>
 					<td>@supplier.PhoneNumber</td>
                     <td>
                         @foreach (var cuisine in supplier.CuisineArray)
@@ -114,16 +109,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
-        try
-        {
-            var distrib = await context.Distributors.Select(d => d.Id).ToObservableCollecionAsync();
-            Profiles = await context.Profiles.Where(p => distrib.Contains(p.Id)).ToObservableCollecionAsync();
-        }
-        catch (Exception ex)
-        {
-            Logger.Log(ex);
-        }
+        Profiles = await data.GetDistributorProfiles();
         SearchResults = Profiles;
         StateContainer.OnChange += StateHasChanged;
     }
@@ -147,7 +133,11 @@ else
     public void Dispose()
     {
         StateContainer.OnChange -= StateHasChanged;
-        context.Dispose();
+        if(context != null)
+        {
+            context.Dispose();
+        }
+        
     }
 
     public void Refresh()

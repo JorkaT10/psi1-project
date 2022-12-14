@@ -2,15 +2,17 @@
 @using AccountDataSerializer
 @using Microsoft.EntityFrameworkCore;
 @using Newtonsoft.Json
+@using PSI_MobileApp.DataServices;
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @using ClassLibrary
+@inject IGetData data
 @inject StateContainer StateContainer
 @inject NavigationManager NavigationManager
 @inject ExceptionLogger Logger
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
-@if(Add())
+@if (createSuccessfully)
 {
     <h3> Profile created successfully.</h3>
 }
@@ -21,38 +23,21 @@ else
 }
 
 @code {
-
+    bool createSuccessfully;
     public void Reload()
     {
         NavigationManager.NavigateTo("finishcreation");
     }
 
-    public bool Add()
+    protected override async Task OnInitializedAsync()
     {
-        try
+        await data.AddNewAccount(StateContainer.TempAccount);
+        await data.AddNewProfile(StateContainer.TempProfile);
+        if (StateContainer.CreatingDistributor)
         {
-            using (ProjectDatabaseContext context = DbFactory.CreateDbContext())
-            {
-
-                context.Add(StateContainer.TempAccount);
-                context.Add(StateContainer.TempProfile);
-                if(StateContainer.CreatingDistributor)
-                {
-                    Distributor newDistributor = new();
-                    newDistributor.Id = StateContainer.TempAccount.Id;
-                    newDistributor.Rating = 0;
-                    context.Add(newDistributor);
-                }
-
-                context.SaveChanges();
-            }
+            await data.AddDistributor(new Distributor());
         }
-        catch(Exception ex)
-        {
-            Logger.Log(ex);
-            return false;
-        }
-        return true;
+        createSuccessfully = true;
     }
     public void Continue()
     {

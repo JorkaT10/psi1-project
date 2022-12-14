@@ -68,8 +68,7 @@ else
     }
     protected override async Task OnInitializedAsync()
     {
-        var profileList = await data.GetAllProfiles();
-        profile = profileList.Where(p => p.Id == CurrentUserContainer.UserId).FirstOrDefault();
+        profile = await data.GetProfileById(CurrentUserContainer.UserId);
     }   
     public void Dispose()
     {
