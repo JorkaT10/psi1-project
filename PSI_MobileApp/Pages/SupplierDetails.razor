@@ -263,8 +263,7 @@ else
                 var buyer = advert.FirstOrDefault().Buyer;
                 if (buyer == null)
                 {
-                    var currentProfile = dbContext.Profiles.Where(p => p.Id == ProfileContainer.GetUserProfile().Id).FirstOrDefault(); //dbContext.Profiles.Where(p => p.Id == ProfileContainer.UserId);
-                    advert.FirstOrDefault().Buyer = currentProfile;
+                    advert.FirstOrDefault().Buyer = dbContext.Profiles.Where(p => p.Id == ProfileContainer.GetUserProfile().Id).FirstOrDefault();
                     selectedRowNumber = -1;
                     mudTable.SetSelectedItem(null);
                     await dbContext.SaveChangesAsync();
