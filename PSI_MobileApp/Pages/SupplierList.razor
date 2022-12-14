@@ -44,8 +44,8 @@
             <MudProgressCircular Color="Color.Default" Indeterminate="true"/>
             <MudText>Loading...</MudText>
             <MudText>@errorOccured</MudText>
-            <MudText>@canNotConnectText</MudText>
-            <MudButton Variant="Variant.Outlined" OnClick="Refresh">Refresh</MudButton>
+            <MudText>@tryingToConnect</MudText>
+            <MudButton Variant="Variant.Outlined" OnClick="Return">Return to Homepage</MudButton>
         </MudStack>
         
     </MudOverlay>
@@ -100,6 +100,7 @@ else
     ProjectDatabaseContext context;
     private string canNotConnectText = string.Empty;
     private string errorOccured = string.Empty;
+    private string tryingToConnect = string.Empty;
     private bool connected;
     public ObservableCollection<Profile> SearchResults
     {
@@ -152,13 +153,17 @@ else
         context.Dispose();
     }
 
-    public void Refresh()
+    public async void Return()
     {
-        if (context.Database.CanConnect())
-            NavigationManager.NavigateTo("/supplierlist", true);
+        tryingToConnect = "Trying to reconnect..."; // don't know if should leave it like this or remove it since it returns back to homepage.
+        StateHasChanged();
+        if (!await context.TestConnection())
+        {
+            NavigationManager.NavigateTo("/", true);
+        }
         else
         {
-            canNotConnectText = "Can not connect to database. Please check your internet connection and try again.";
+            tryingToConnect = string.Empty;
         }
     }
 
@@ -169,7 +174,7 @@ else
         {
             while (true)
             {
-                connected = await TestConnection();
+                connected = await context.TestConnection();
                 if (connected)
                     await GetDBData();
                 else
@@ -196,22 +201,5 @@ else
         await InvokeAsync(StateHasChanged);
     }
 
-    public async Task<bool> TestConnection()
-    {
-        await using (NpgsqlConnection conn = new NpgsqlConnection("Server=host.docker.internal;Port=49172;Database=pg;Uid=postgres;Pwd=postgrespw;"))
-        {
-            try
-            { 
-                await conn.OpenAsync();
-                var connected = (conn.State == System.Data.ConnectionState.Open);
-                await conn.CloseAsync();
-                return connected;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-    }
 
 }
