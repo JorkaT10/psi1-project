@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using ClassLibrary;
+using System.Net.Http.Json;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace PSI_MobileApp.DataServices
 {
@@ -209,12 +212,12 @@ namespace PSI_MobileApp.DataServices
             }
             return returnResponse;
         }
-        public async Task AddDistributor(Distributor distributor)
+        public async Task AddDistributor(Guid id)
         {
             using (var client = new HttpClient())
             {
-                string url = $"{_baseUrl}/AddDistributor?id={JsonConvert.SerializeObject(distributor)}";
-                var apiResponse = await client.GetAsync(url);
+                string url = $"{_baseUrl}/AddDistributor";
+                var apiResponse = await client.PutAsJsonAsync(url, id);
                 if (!apiResponse.IsSuccessStatusCode)
                 {
                     throw new HttpRequestException();
@@ -225,8 +228,8 @@ namespace PSI_MobileApp.DataServices
         {
             using (var client = new HttpClient())
             {
-                string url = $"{_baseUrl}/AddNewProfile?id={JsonConvert.SerializeObject(profile)}";
-                var apiResponse = await client.GetAsync(url);
+                string url = $"{_baseUrl}/AddNewProfile";
+                var apiResponse = await client.PutAsJsonAsync(url, profile);
                 if (!apiResponse.IsSuccessStatusCode)
                 {
                     throw new HttpRequestException();
@@ -237,7 +240,82 @@ namespace PSI_MobileApp.DataServices
         {
             using (var client = new HttpClient())
             {
-                string url = $"{_baseUrl}/AddNewAccount?={JsonConvert.SerializeObject(account)}";
+                string url = $"{_baseUrl}/AddNewAccount";
+                var apiResponse = await client.PutAsJsonAsync(url, account);
+                if (!apiResponse.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException();
+                }
+            }
+        }
+        public async Task AddAd(Advertisement advertisement, Guid id)
+        {
+            using (var client = new HttpClient())
+            {
+                string url = $"{_baseUrl}/AddAd?distributorId={id}";
+                var text = JsonConvert.SerializeObject(advertisement);
+                var apiResponse = await client.PutAsJsonAsync(url, advertisement);
+                if (!apiResponse.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException();
+                }
+            }
+        }
+        public async Task RemoveOutdated(DateTime now)
+        {
+            using (var client = new HttpClient())
+            {
+                string url = $"{_baseUrl}/RemoveOutdated";
+                var apiResponse = await client.PutAsJsonAsync(url, now);
+                if (!apiResponse.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException();
+                }
+            }
+        }
+        public async Task RemoveAdvertisement(Advertisement advertisement)
+        {
+            using (var client = new HttpClient())
+            {
+                string url = $"{_baseUrl}/RemoveAdvertisement";
+                var apiResponse = await client.PutAsJsonAsync(url, advertisement);
+                if (!apiResponse.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException();
+                }
+            }
+        }
+        public async Task ChangeOrderStatus(Advertisement advertisement, Guid id)
+        {
+            using (var client = new HttpClient())
+            {
+                string url = $"{_baseUrl}/ChangeOrderStatus?id={id}";
+                var apiResponse = await client.PutAsJsonAsync(url, advertisement);
+                if (!apiResponse.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException();
+                }
+            }
+        }
+        public async Task<Guid> GetAccount(string username, string password)
+        {
+            using (var client = new HttpClient())
+            {
+                string url = $"{_baseUrl}/GetAccount?username={username}&password={password}";
+                var apiResponse = await client.GetAsync(url);
+                if (!apiResponse.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException();
+                }
+                var response = await apiResponse.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<Guid>(response);
+            }
+        }
+        public async Task UpdateProfile()
+        {
+            using (var client = new HttpClient())
+            {
+                string url = $"{_baseUrl}/Update";
                 var apiResponse = await client.GetAsync(url);
                 if (!apiResponse.IsSuccessStatusCode)
                 {

@@ -26,10 +26,16 @@ namespace WebApplication1.Controllers
             return items;
         }
         [HttpPut("~/AddNewAccount")]
-        public async void AddNewAccount(Account account)
+        public async Task AddNewAccount([FromBody] Account account)
         {
             await _context.Accounts.AddAsync(account);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
+        }
+        [HttpGet("~/GetAccount")]
+        public async Task<Guid> GetAccount(string username, string password)
+        {
+            var account = await _context.Accounts.Where(a => a.Password.Equals(password) && a.UserName.Equals(username)).Select(a => a.Id).FirstOrDefaultAsync();
+            return account;
         }
     }
 }

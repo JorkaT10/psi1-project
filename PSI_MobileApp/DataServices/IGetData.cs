@@ -22,9 +22,14 @@ namespace PSI_MobileApp.DataServices
         Task<ObservableCollection<Distributor>> GetAllDistributors();
         Task<Distributor> GetDistributorsById(Guid id);
         Distributor GetDistributorsByIdConcurrent(Guid id);
-        Task AddDistributor(Distributor distributor);
+        Task AddDistributor(Guid id);
         Task AddNewProfile(Profile profile);
         Task AddNewAccount(Account account);
-
+        Task AddAd(Advertisement advertisement, Guid id);
+        Task RemoveOutdated(DateTime now);
+        Task RemoveAdvertisement(Advertisement advertisement);
+        Task ChangeOrderStatus(Advertisement advertisement, Guid id);
+        Task<Guid> GetAccount(string username, string password);
+        Task UpdateProfile();
     }
 }

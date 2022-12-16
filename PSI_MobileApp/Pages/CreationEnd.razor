@@ -12,18 +12,25 @@
 @inject ExceptionLogger Logger
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
-@if (createSuccessfully)
+@if (createSuccessfully != null)
 {
-    <h3> Profile created successfully.</h3>
+    @if (createSuccessfully == true)
+    {
+        <h3> Profile created successfully.</h3>
+    }
+    else
+    {
+        <h3> Profile creation failed unexpectedly.</h3>
+        <MudButton @onclick="Reload"></MudButton>
+    }
 }
 else
 {
-    <h3> Profile creation failed unexpectedly.</h3>
-    <MudButton @OnClick="Reload"></MudButton>
+    <MudText> Creating Profile </MudText>
 }
 
 @code {
-    bool createSuccessfully;
+    bool? createSuccessfully = null;
     public void Reload()
     {
         NavigationManager.NavigateTo("finishcreation");
@@ -35,7 +42,7 @@ else
         await data.AddNewProfile(StateContainer.TempProfile);
         if (StateContainer.CreatingDistributor)
         {
-            await data.AddDistributor(new Distributor());
+            await data.AddDistributor(StateContainer.TempAccount.Id);
         }
         createSuccessfully = true;
     }

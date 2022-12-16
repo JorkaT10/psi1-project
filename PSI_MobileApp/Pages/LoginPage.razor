@@ -1,6 +1,7 @@
 ﻿@page "/login"
 @using AccountDataSerializer
 @using ClassLibrary
+@using PSI_MobileApp.DataServices;
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @inject CurrentUserContainer CurrentUserContainer
@@ -8,7 +9,7 @@
 @inject StateContainer StateContainer
 @inject ExceptionLogger Logger
 @inject NavigationManager NavigationManager
-@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
+@inject IGetData data
 @implements IDisposable
 <h3> Login </h3>
 <MudForm @bind-isValid = "@isValid">
@@ -41,19 +42,9 @@
             PasswordInput = InputType.Text;
         }
     }
-    public void HandleValidSubmit()
+    public async Task HandleValidSubmit()
     {
-        try
-        {
-            using (var context = DbFactory.CreateDbContext())
-            {
-                CurrentUserContainer.UserId = context.Accounts.Where(elem => elem.Password == Password && elem.UserName == Username).Select(elem => elem.Id).FirstOrDefault();
-            }
-        }
-        catch(Exception ex)
-        {
-            Logger.Log(ex);
-        }
+        CurrentUserContainer.UserId = await data.GetAccount(Username, Password);
         if ((CurrentUserContainer.UserId != null) && (CurrentUserContainer.UserId != Guid.Empty))
         {
             NavigationManager.NavigateTo("");

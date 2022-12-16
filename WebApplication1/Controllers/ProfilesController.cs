@@ -36,9 +36,14 @@ namespace WebApplication1.Controllers
             return items;
         }
         [HttpPut("~/AddNewProfile")]
-        public async void AddNewProfile(Profile profile)
+        public async Task AddNewProfile(Profile profile)
         {
             await _context.Profiles.AddAsync(profile);
+            await _context.SaveChangesAsync();
+        }
+        [HttpPut("~/Update")]
+        public async Task UpdateProfile()
+        {
             await _context.SaveChangesAsync();
         }
     }
