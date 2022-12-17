@@ -14,7 +14,7 @@
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
 <h3>Input Contact Data</h3>
-@if ((CurrentUserContainer.UserId != Guid.Empty) || (CurrentUserContainer.UserId != null))
+@if ((CurrentUserContainer.UserId != Guid.Empty))
 {
     <MudForm @bind-isValid="@isValid">
         @if (StateContainer.CreatingDistributor)
@@ -53,7 +53,7 @@ else
     public string DistributorName = string.Empty;
     public void HandleValidSubmit()
     {
-        if ((CurrentUserContainer.UserId == Guid.Empty) || (CurrentUserContainer.UserId == null))
+        if ((CurrentUserContainer.UserId == Guid.Empty))
         {
             Address address = new();
             if (StateContainer.CreatingDistributor)

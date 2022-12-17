@@ -173,6 +173,25 @@ namespace PSI_MobileApp.DataServices
             }
             return returnResponse;
         }
+        public async Task<Account> GetAccountById(Guid id)
+        {
+            var returnResponse = new Account();
+            if (id == Guid.Empty)
+            {
+                return null;
+            }
+            using (var client = new HttpClient())
+            {
+                string url = $"{_baseUrl}/GetAccountById?id={id}";
+                var apiResponse = await client.GetAsync(url);
+                if (apiResponse.IsSuccessStatusCode)
+                {
+                    var response = await apiResponse.Content.ReadAsStringAsync();
+                    returnResponse = JsonConvert.DeserializeObject<Account>(response);
+                }
+            }
+            return returnResponse;
+        }
 
         public async Task<Distributor>GetDistributorsById(Guid id)
         {
@@ -208,6 +227,44 @@ namespace PSI_MobileApp.DataServices
                 {
                     var response = apiResponse.Content.ReadAsStringAsync().Result;
                     returnResponse = JsonConvert.DeserializeObject<Distributor>(response);
+                }
+            }
+            return returnResponse;
+        }
+        public Account GetAccountByIdConcurrent(Guid id)
+        {
+            var returnResponse = new Account();
+            if (id == Guid.Empty)
+            {
+                return null;
+            }
+            using (var client = new HttpClient())
+            {
+                string url = $"{_baseUrl}/GetAccountById?id={id}";
+                var apiResponse = client.GetAsync(url).Result;
+                if (apiResponse.IsSuccessStatusCode)
+                {
+                    var response = apiResponse.Content.ReadAsStringAsync().Result;
+                    returnResponse = JsonConvert.DeserializeObject<Account>(response);
+                }
+            }
+            return returnResponse;
+        }
+        public Profile GetProfileByIdConcurrent(Guid id)
+        {
+            var returnResponse = new Profile();
+            if (id == Guid.Empty)
+            {
+                return null;
+            }
+            using (var client = new HttpClient())
+            {
+                string url = $"{_baseUrl}/GetProfilesById?id={id}";
+                var apiResponse = client.GetAsync(url).Result;
+                if (apiResponse.IsSuccessStatusCode)
+                {
+                    var response = apiResponse.Content.ReadAsStringAsync().Result;
+                    returnResponse = JsonConvert.DeserializeObject<Profile>(response);
                 }
             }
             return returnResponse;
@@ -285,12 +342,12 @@ namespace PSI_MobileApp.DataServices
                 }
             }
         }
-        public async Task ChangeOrderStatus(Advertisement advertisement, Guid id)
+        public async Task ChangeOrderStatus(Guid advertisementId, Guid id)
         {
             using (var client = new HttpClient())
             {
-                string url = $"{_baseUrl}/ChangeOrderStatus?id={id}";
-                var apiResponse = await client.PutAsJsonAsync(url, advertisement);
+                string url = $"{_baseUrl}/ChangeOrderStatus?advertisementId={advertisementId}&id={id}";
+                var apiResponse = await client.PutAsJsonAsync(url, new List<int>());
                 if (!apiResponse.IsSuccessStatusCode)
                 {
                     throw new HttpRequestException();

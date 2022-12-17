@@ -73,7 +73,7 @@ else if (profile != null)
                    <MudTd DataLabel="Is Reserved">@(context.Buyer != null)</MudTd>
                 }
             }
-            else if ((ProfileContainer.UserId != null) && (context.Buyer.Id == ProfileContainer.UserId || ProfileContainer.UserId == IdContainer.Id))
+            else if ((ProfileContainer.UserId != Guid.Empty) && (context.Buyer.Id == ProfileContainer.UserId || ProfileContainer.UserId == IdContainer.Id))
             {
                 <MudTd DataLabel="Name">@context.MealName</MudTd>
                 <MudTd DataLabel="Time Of Making">@HandleTime(context.TimeOfMaking)</MudTd>
@@ -86,7 +86,7 @@ else if (profile != null)
             }
         </RowTemplate>
     </MudTable>
-    @if (ProfileContainer.UserId != null)
+    @if (ProfileContainer.UserId != Guid.Empty)
     {
         if (ProfileContainer.UserId == IdContainer.Id)
         {
@@ -161,64 +161,63 @@ else
 
     public async Task AddOrderCommand()
     {   
-            DialogOptions noHeader = new DialogOptions() { NoHeader = true };
-            var dialog = DialogService.Show<AddOrderDialog>("", noHeader);
-            var res = await dialog.Result;
+        DialogOptions noHeader = new DialogOptions() { NoHeader = true };
+        var dialog = DialogService.Show<AddOrderDialog>("", noHeader);
+        var res = await dialog.Result;
 
-            if (!res.Cancelled)
-            {
-                var adv = res.Data as Advertisement;
-                adv.Id = Guid.NewGuid();
-                var search = await data.GetDistributorsById(IdContainer.Id);//dbContext.Distributors.Where(d => d.Id == IdContainer.Id).FirstOrDefault();
-                adv.Distributor = search;
-                await data.AddAd(adv as Advertisement, search.Id);
-                selectedRowNumber = -1;
-                mudTable.SetSelectedItem(null);
-                await mudTable.ReloadServerData();
-            }
+        if (!res.Cancelled)
+        {
+            var adv = res.Data as Advertisement;
+            adv.Id = Guid.NewGuid();
+            var search = await data.GetDistributorsById(IdContainer.Id);//dbContext.Distributors.Where(d => d.Id == IdContainer.Id).FirstOrDefault();
+            adv.Distributor = search;
+            await data.AddAd(adv as Advertisement, search.Id);
+            selectedRowNumber = -1;
+            mudTable.SetSelectedItem(null);
+            await mudTable.ReloadServerData();
+        }
 
     }
 
     private void RowClickEvent(TableRowClickEventArgs<Advertisement> tableRowClickEventArgs)
     {
-        //SelectedAdvertisement = tableRowClickEventArgs.Item;
+        SelectedAdvertisement = tableRowClickEventArgs.Item;
     }
 
     private async Task RemoveOrderCommand()
     {
         var allAdvertisements = await data.GetAllAdvertisements();
-                await data.RemoveAdvertisement(SelectedAdvertisement);
-                await mudTable.ReloadServerData();
+        await data.RemoveAdvertisement(SelectedAdvertisement);
+        await mudTable.ReloadServerData();
     }
 
     private async Task BookOrderCommand()
     {
-        var allAdvertisements = await data.GetAllAdvertisements();
-            if (SelectedAdvertisement != null)
+        
+        if (SelectedAdvertisement != null)
+        {
+            var buyer = SelectedAdvertisement.Buyer;
+            if (buyer == null)
             {
-                var advert = allAdvertisements.Where(i => i.Equals(SelectedAdvertisement));
-                var buyer = advert.FirstOrDefault().Buyer;
-                if (buyer == null)
+                var currentProfile = ProfileContainer.GetUserProfile(); //dbContext.Profiles.Where(p => p.Id == ProfileContainer.UserId);
+                await data.ChangeOrderStatus(SelectedAdvertisement.Id, currentProfile.Id);//advert.FirstOrDefault().Buyer = currentProfile;
+                selectedRowNumber = -1;
+                mudTable.SetSelectedItem(null);
+                await mudTable.ReloadServerData();
+            }
+            else
+            {
+                if (buyer.Id == ProfileContainer.UserId)
                 {
-                    var currentProfile = ProfileContainer.GetUserProfile(); //dbContext.Profiles.Where(p => p.Id == ProfileContainer.UserId);
-                    await data.ChangeOrderStatus(advert.FirstOrDefault(), currentProfile.Id);//advert.FirstOrDefault().Buyer = currentProfile;
+                    await data.ChangeOrderStatus(SelectedAdvertisement.Id, Guid.Empty);
                     selectedRowNumber = -1;
                     mudTable.SetSelectedItem(null);
                     await mudTable.ReloadServerData();
                 }
-                else
-                {
-                    if (buyer.Id == ProfileContainer.UserId)
-                    {
-                        await data.ChangeOrderStatus(advert.FirstOrDefault(), Guid.Empty);
-                        selectedRowNumber = -1;
-                        mudTable.SetSelectedItem(null);
-                        await mudTable.ReloadServerData();
-                    }
-                }
-                SelectedAdvertisement = null;
-
             }
+            SelectedAdvertisement = null;
+
+        }
 
     }
 
@@ -236,13 +235,12 @@ else
     private int totalItems;
     private async Task<TableData<Advertisement>> ServerReload(TableState state)
     {
-        var allAdvertisements = await data.GetAllAdvertisements();
-            selectedRowNumber = -1;
-            mudTable.SetSelectedItem(null);
-            SelectedAdvertisement = null;
-            await data.RemoveOutdated(DateTime.UtcNow);
-            var query = allAdvertisements.Where(a => a.Distributor.Id == profile.Id);
-            await Task.Delay(300);
+        selectedRowNumber = -1;
+        mudTable.SetSelectedItem(null);
+        SelectedAdvertisement = null;
+        await data.RemoveOutdated(DateTime.UtcNow);
+        IEnumerable<Advertisement> query = await data.GetAdsByDistributorId(profile.Id); // dbContext.Advertisements.Include(a => a.Buyer).Where(a => a.Distributor.Id == profile.Id);
+        await Task.Delay(300);
 
             switch (state.SortLabel)
             {

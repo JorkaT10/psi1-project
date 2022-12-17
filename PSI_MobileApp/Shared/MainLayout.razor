@@ -4,7 +4,6 @@
 @inject CurrentUserContainer container
 @inject NavigationManager NavigationManager
 @inject ExceptionLogger logger
-@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 <div class="page">
 	<MudThemeProvider />
 	<MudDialogProvider  />
@@ -47,7 +46,7 @@
 
 	public void SignOut()
 	{
-		container.Logout(logger, DbFactory.CreateDbContext());
+		container.Logout();
 	}
 
 	public void SignIn()

@@ -45,7 +45,7 @@
     public async Task HandleValidSubmit()
     {
         CurrentUserContainer.UserId = await data.GetAccount(Username, Password);
-        if ((CurrentUserContainer.UserId != null) && (CurrentUserContainer.UserId != Guid.Empty))
+        if (CurrentUserContainer.UserId != Guid.Empty)
         {
             NavigationManager.NavigateTo("");
         }

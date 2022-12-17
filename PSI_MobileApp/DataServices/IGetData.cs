@@ -15,6 +15,8 @@ namespace PSI_MobileApp.DataServices
         Task<ObservableCollection<Profile>> GetDistributorProfiles();
         Task<Profile> GetProfileById(Guid? id);
         Task<ObservableCollection<Account>> GetAllAccounts();
+        Task<Account> GetAccountById(Guid id);
+
         Task<ObservableCollection<Advertisement>> GetAllAdvertisements();
         Task<Advertisement> GetAdvertisementsById(Guid id);
         Task<ObservableCollection<Advertisement>> GetAdsByDistributorId(Guid id);
@@ -28,7 +30,7 @@ namespace PSI_MobileApp.DataServices
         Task AddAd(Advertisement advertisement, Guid id);
         Task RemoveOutdated(DateTime now);
         Task RemoveAdvertisement(Advertisement advertisement);
-        Task ChangeOrderStatus(Advertisement advertisement, Guid id);
+        Task ChangeOrderStatus(Guid advertisementId, Guid id);
         Task<Guid> GetAccount(string username, string password);
         Task UpdateProfile();
     }

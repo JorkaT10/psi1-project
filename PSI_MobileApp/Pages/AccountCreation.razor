@@ -2,6 +2,7 @@
 @using AccountDataSerializer
 @using Microsoft.EntityFrameworkCore;
 @using Newtonsoft.Json
+@using PSI_MobileApp.DataServices;
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @using System.Text.Json
@@ -10,8 +11,8 @@
 @implements IDisposable
 @inject ExceptionLogger ExceptionLogger
 @inject StateContainer StateContainer
+@inject IGetData data
 @inject NavigationManager NavigationManager
-@inject IDbContextFactory<ProjectDatabaseContext> DbContextFactory
 <h3>Create new account</h3>
 <!--<MudText> Test </MudText>-->
 <MudForm @bind-isValid = "@isValid">
@@ -112,22 +113,15 @@
     {
         StateContainer.OnChange -= StateHasChanged;
     }
-    
-     public string IsUniqueUsername(string username)
-     {
-        using (var context = DbContextFactory.CreateDbContext())
+
+    public string IsUniqueUsername(string username)
+    {
+        if(data.GetAllAccounts().Result.All(a => !a.UserName.Equals(username)))
         {
-            try 
-            {
-                if(context.Accounts.All(elem => elem.UserName != username))
-                {
-                    return null;
-                }
-            }
-            catch(Exception ex)
-            {
-                ExceptionLogger.Log(ex);
-            }
+            return null;
+        }
+        else
+        {
             return "Username is already in use.";
         }
     }

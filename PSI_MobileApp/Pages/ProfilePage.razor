@@ -10,7 +10,6 @@
 @inject IGetData data
 @inject CurrentUserContainer CurrentUserContainer
 @inject ExceptionLogger Logger
-@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
 <h3> </h3>
 @if (profile != null)
@@ -52,7 +51,7 @@ else
 
     public void Logout()
     {
-        CurrentUserContainer.Logout(Logger, DbFactory.CreateDbContext());
+        CurrentUserContainer.Logout();
         NavigationManager.NavigateTo("profile");
     }
 

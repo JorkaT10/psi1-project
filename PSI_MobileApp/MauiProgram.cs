@@ -31,7 +31,6 @@ public static class MauiProgram
         builder.Services.AddScoped<IdStateContainer>();
 		builder.Services.AddScoped<CurrentUserContainer>();
 		builder.Services.AddSingleton<IGetData, GetData>();
-		builder.Services.AddDbContextFactory<ProjectDatabaseContext>();
 		return builder.Build();
 	}
 }

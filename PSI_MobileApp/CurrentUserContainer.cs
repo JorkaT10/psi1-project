@@ -7,17 +7,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using PSI_MobileApp.DataServices;
+using Microsoft.Identity.Client;
 
 namespace PSI_MobileApp
 {
     public class CurrentUserContainer
     {
-        private Guid? _userId { get; set; }
+        private Guid _userId { get; set; }
         private Lazy<Account> _userAccount { get; set; }
         private Lazy<Profile> _userProfile { get; set; }
+        private GetData getData = new();
         private Lazy<Distributor> _userDistributor { get; set; }
-        public Guid? UserId
+        public Guid UserId
         {
             get { return _userId; }
             set { _userId = value; }
@@ -34,61 +36,32 @@ namespace PSI_MobileApp
         {
             return _userDistributor.Value;
         }
-        public Account GetAccountFromDB(ExceptionLogger logger, ProjectDatabaseContext context)
+        public Account GetAccountFromWeb()
         {
-            try
-            {
-                return context.Accounts.Where(profile => profile.Id == this.UserId).FirstOrDefault();
-            }
-            catch(Exception ex)
-            {
-                logger.Log(ex);
-                return null;
-            }
+            return getData.GetAccountByIdConcurrent(UserId);
+        }
+        public Distributor GetDistributorFromWeb()
+        {
+            return getData.GetDistributorsByIdConcurrent(UserId);
+        }
+        public Profile GetProfileFromWeb()
+        {
+            return getData.GetProfileByIdConcurrent(UserId);
+        }
+        public void Logout()
+        {
+            UserId = Guid.Empty;
+            _userDistributor = new Lazy<Distributor>(delegate () { return GetDistributorFromWeb(); });
+            _userAccount = new Lazy<Account>(delegate () { return GetAccountFromWeb(); });
+            _userProfile = new Lazy<Profile>(delegate () { return GetProfileFromWeb(); });
         }
 
-        public Profile GetProfileFromDB(ExceptionLogger logger, ProjectDatabaseContext context)
+        public CurrentUserContainer()
         {
-            try
-            {
-                return context.Profiles.Where(profile => profile.Id == this.UserId).FirstOrDefault();
-            }
-            catch(Exception ex)
-            {
-                logger.Log(ex);
-                return null;
-            }
-        }
-        public Distributor GetDistributorFromDB(ExceptionLogger logger, ProjectDatabaseContext context)
-        {
-            try
-            {
-                return context.Distributors.Where(profile => profile.Id == this.UserId).FirstOrDefault();
-            }
-            catch(Exception ex)
-            {
-                logger.Log(ex);
-                return null;
-            }
-        }
-
-        public void Logout(ExceptionLogger logger, ProjectDatabaseContext context)
-        {
-            UserId = null;
-            _userDistributor = new Lazy<Distributor>(delegate () { return GetDistributorFromDB(logger, context); });
-            _userAccount = new Lazy<Account>(delegate () { return GetAccountFromDB(logger, context); });
-            _userProfile = new Lazy<Profile>(delegate () { return GetProfileFromDB(logger, context); });
-        }
-        public void RefreshProfile(ExceptionLogger logger, ProjectDatabaseContext context)
-        {
-            _userProfile = new Lazy<Profile>(delegate () { return GetProfileFromDB(logger, context); });
-        }
-
-        public CurrentUserContainer(ExceptionLogger logger, ProjectDatabaseContext context)
-        {
-            this._userAccount = new Lazy<Account>(delegate () { return GetAccountFromDB(logger, context); });
-            this._userProfile = new Lazy<Profile>(delegate () { return GetProfileFromDB(logger, context); });
-            this._userDistributor = new Lazy<Distributor>(delegate () { return GetDistributorFromDB(logger, context); });
+            UserId = Guid.Empty;
+            _userDistributor = new Lazy<Distributor>(delegate () { return GetDistributorFromWeb(); });
+            _userAccount = new Lazy<Account>(delegate ()  { return GetAccountFromWeb(); }) ;
+            _userProfile = new Lazy<Profile>(delegate () { return GetProfileFromWeb(); });
 
         }
         public event Action? OnChange;

@@ -19,7 +19,7 @@ namespace WebApplication1.Controllers
             var items = await _context.Accounts.ToListAsync();
             return items;
         }
-        [HttpGet("~/GetAccountsById")]
+        [HttpGet("~/GetAccountById")]
         public async Task<Account> GetAccountById(Guid id)
         {
             var items = await _context.Accounts.Where(elem => elem.Id == id).FirstOrDefaultAsync();

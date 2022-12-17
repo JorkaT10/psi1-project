@@ -87,7 +87,6 @@ else
 @code {
     // private AccountDataSerializer<Profile> _dataSerializer;
     private ObservableCollection<Profile> _searchResult;
-    ProjectDatabaseContext context;
     private string canNotConnectText = string.Empty;
     public ObservableCollection<Profile> SearchResults
     {
@@ -132,20 +131,10 @@ else
     public void Dispose()
     {
         StateContainer.OnChange -= StateHasChanged;
-        if(context != null)
-        {
-            context.Dispose();
-        }
         
     }
 
     public void Refresh()
     {
-        if (context.Database.CanConnect())
-            NavigationManager.NavigateTo("/supplierlist", true);
-        else
-        {
-            canNotConnectText = "Can not connect to database. Please check your internet connection and try again.";
-        }
     }
 }

@@ -67,9 +67,10 @@ namespace WebApplication1.Controllers
             await _context.SaveChangesAsync();
         }
         [HttpPut("~/ChangeOrderStatus")]
-        public async Task ChangeOrderStatus([FromBody] Advertisement advertisement, [FromQuery] Guid id)
+        public async Task ChangeOrderStatus([FromQuery] Guid advertisementId, [FromQuery] Guid id)
         {
             var profile = _context.Profiles.Where(a => a.Id == id).FirstOrDefault();
+            var advertisement = _context.Advertisements.Where(a => a.Id == advertisementId).First();
             advertisement.Buyer = profile;
             await _context.SaveChangesAsync();
         }
