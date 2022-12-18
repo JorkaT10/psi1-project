@@ -7,7 +7,6 @@
 @inject StateContainer StateContainer
 @inject CurrentUserContainer CurrentUserContainer
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
-@inject ExceptionLogger Logger
 @implements IDisposable
 
 <h3>Reservations</h3>
@@ -50,29 +49,14 @@ else
 
     public string GetDistributorName(Advertisement adv)
     {
-        try
-        {
-            return _context.Profiles.Where(elem => elem.Id == adv.Distributor.Id).FirstOrDefault().Name;
-        }
-        catch(Exception ex)
-        {
-            Logger.Log(ex);
-            return null;
-        }
+        return _context.Profiles.Where(elem => elem.Id == adv.Distributor.Id).FirstOrDefault().Name;
     }
 
     protected override void OnInitialized()
     {
         StateContainer.OnChange += StateHasChanged;
         _context = DbFactory.CreateDbContext();
-        try
-        {
-            UserReservations = _context.Advertisements.Include("Buyer").Include("Distributor").Where(i => i.Buyer.Id == CurrentUserContainer.UserId).ToObservableCollection();
-        }
-        catch (Exception ex)
-        {
-            Logger.Log(ex);
-        }
+        UserReservations = _context.Advertisements.Include("Buyer").Include("Distributor").Where(i => i.Buyer.Id == CurrentUserContainer.UserId).ToObservableCollection();
 }
     public void Dispose()
     {

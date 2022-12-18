@@ -8,7 +8,7 @@ namespace PSI_MobileApp
 {
     public class ExceptionLogger : IDisposable
     {
-        private string path = "C:\\Users\\Matas\\source\\repos\\JorkaT10\\psi1-project\\ClassLibrary1\\Log.txt";
+        private string path = "C:\\Users\\matas\\source\\repos\\JorkaT10\\psi1-project\\PSI_MobileApp\\Log.txt";
         private FileStream fileStream;
         public ExceptionLogger() {
             if (!File.Exists(path))

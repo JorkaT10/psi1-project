@@ -8,7 +8,6 @@
 @inject NavigationManager NavigationManager
 @inject CurrentUserContainer CurrentUserContainer
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
-@inject ExceptionLogger Logger
 @implements IDisposable
 
 <h3>Subscriptions</h3>
@@ -27,8 +26,6 @@ else
 			</tr>
 		</thead>
 		<tbody>
-			@try
-			{
 				@foreach (var supplier in Profile.Subscriptions)
 				{
 					<tr>
@@ -43,11 +40,6 @@ else
 						<MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(supplier)">Unsubscribe</MudButton>
 					</tr>
 				}
-			}
-			catch(Exception ex)
-			{
-				Logger.Log(ex);
-			}
 		</tbody>
 	</table>
 }
@@ -83,25 +75,19 @@ else
 
 	protected override async Task OnInitializedAsync()
 	{
-		try
+		_context = DbFactory.CreateDbContext();
+
+		if (_context != null && _context.Profiles != null)
 		{
-			_context = DbFactory.CreateDbContext();
+			StateContainer.OnChange += StateHasChanged;
 
-			if (_context != null && _context.Profiles != null)
-			{
-				StateContainer.OnChange += StateHasChanged;
-
-				Profile = CurrentUserContainer.GetUserProfile();
-				DistributorProfiles = _context.Profiles.ToList();
-			}
-
-			await base.OnInitializedAsync();
+			Profile = CurrentUserContainer.GetUserProfile();
+			DistributorProfiles = _context.Profiles.ToList();
 		}
-		catch(Exception ex)
-		{
-			Logger.Log(ex);
-		}
+
+		await base.OnInitializedAsync();
 	}
+
 	public void Dispose()
 	{
 		StateContainer.OnChange -= StateHasChanged;

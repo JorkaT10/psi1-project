@@ -1,11 +1,13 @@
-﻿using ClassLibrary;
+﻿using Autofac.Extras.DynamicProxy;
+using ClassLibrary;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProfileClasses;
 
 namespace WebApplication1.Controllers
 {
-    public class AccountsController : Controller
+	[Intercept(typeof(LoggingInterceptor))]
+	public class AccountsController : Controller
     {
         private readonly ProjectDatabaseContext _context;
 
@@ -32,9 +34,10 @@ namespace WebApplication1.Controllers
             _context.SaveChanges();
         }
         [HttpGet("~/GetAccount")]
-        public async Task<Guid> GetAccount(string username, string password)
+        public async virtual Task<Guid> GetAccount(string username, string password)
         {
-            var account = await _context.Accounts.Where(a => a.Password.Equals(password) && a.UserName.Equals(username)).Select(a => a.Id).FirstOrDefaultAsync();
+			throw new NotImplementedException();
+			var account = await _context.Accounts.Where(a => a.Password.Equals(password) && a.UserName.Equals(username)).Select(a => a.Id).FirstOrDefaultAsync();
             return account;
         }
     }

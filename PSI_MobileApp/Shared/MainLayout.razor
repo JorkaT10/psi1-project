@@ -3,7 +3,6 @@
 @using Microsoft.EntityFrameworkCore;
 @inject CurrentUserContainer container
 @inject NavigationManager NavigationManager
-@inject ExceptionLogger logger
 <div class="page">
 	<MudThemeProvider />
 	<MudDialogProvider  />
@@ -21,7 +20,7 @@
 					<MudAvatar @ref="avatar"> @AddLetter() </MudAvatar>
 				</ActivatorContent>
 				<ChildContent>
-					@if(container.UserId != null)
+					@if(container.UserId != Guid.Empty)
 					{
 						<MudMenuItem >Profile</MudMenuItem>
 						<MudMenuItem OnClick="SignOut">Log Out</MudMenuItem>
@@ -59,7 +58,7 @@
 	}
 	public String AddLetter()
 	{
-		if((container.UserId != null) && (container.UserId != Guid.Empty))
+		if((container.UserId != Guid.Empty))
 		{
 			return container.GetUserAccount().UserName.Substring(0, 1);
 		}
