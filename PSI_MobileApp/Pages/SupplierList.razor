@@ -79,15 +79,22 @@ else
                 }
             </MudTd>
             <MudTd>
-                @if (Profile != null && Profile.Subscriptions != null)
+                @if (Profile != null)
                 {
-                    @if (Profile.Subscriptions.Contains(Distributors.First(d => d.Id == context.Id)))
+                    @if(Profile.Subscriptions != null)
                     {
-                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(data.GetDistributorsById(context.Id).Result)">Unsubscribe</MudButton>
+                        @if (Profile.Subscriptions.Contains(Distributors.First(d => d.Id == context.Id)))
+                        {
+                            <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="async ()=> await ChangeSubscriptionStatus(context.Id)">Unsubscribe</MudButton>
+                        }
+                        else
+                        {
+                            <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="async ()=> await ChangeSubscriptionStatus(context.Id)">Subscribe</MudButton>
+                        }
                     }
                     else
                     {
-                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(data.GetDistributorsById(context.Id).Result)">Subscribe</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="async ()=> await ChangeSubscriptionStatus(context.Id)">Subscribe</MudButton>
                     }
                 }
             </MudTd>
@@ -131,7 +138,11 @@ else
     protected override async Task OnInitializedAsync()
     {
         ActivateTestConnection();
-        Profile = CurrentUserContainer.GetProfileFromWeb();
+        Profile = null;
+        if(CurrentUserContainer.UserId != Guid.Empty)
+        {
+            Profile = await data.GetProfileById(CurrentUserContainer.UserId);
+        }
         StateContainer.OnChange += StateHasChanged;
     }
 
@@ -151,16 +162,10 @@ else
         NavigationManager.NavigateTo("/supplierdetails");
     }
 
-    public void ChangeSubscriptionStatus(Distributor distributor)
+    public async Task ChangeSubscriptionStatus(Guid distributorId)
     {
-        if (Profile.Subscriptions.Contains(distributor))
-        {
-            Profile.Subscriptions.Remove(distributor);
-        }
-        else
-        {
-            Profile.Subscriptions.Add(distributor);
-        }
+        await data.ChangeSubscriptionStatus(distributorId, CurrentUserContainer.UserId);
+        var distributor = await data.GetDistributorsById(distributorId);
         //context.SaveChanges();
     }
 

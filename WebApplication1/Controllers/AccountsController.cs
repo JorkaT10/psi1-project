@@ -40,5 +40,11 @@ namespace WebApplication1.Controllers
 			var account = await _context.Accounts.Where(a => a.Password.Equals(password) && a.UserName.Equals(username)).Select(a => a.Id).FirstOrDefaultAsync();
             return account;
         }
+        [HttpGet("~/GetAllAccountsConcurrent")]
+        public async Task<List<Account>> GetAllAccountsConcurrent()
+        {
+            var items = _context.Accounts.ToList();
+            return items;
+        }
     }
 }
