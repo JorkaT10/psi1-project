@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using ClassLibrary;
 using Castle.DynamicProxy;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Serialization;
 
 namespace WebApplication1
 {
@@ -24,7 +25,7 @@ namespace WebApplication1
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc().AddControllersAsServices();
-			services.AddControllers();
+			services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 			services.AddSwaggerGen(c =>
 			{
 				c.SwaggerDoc("v1", new OpenApiInfo { Title = "PSIProject", Version = "v1" });

@@ -1,5 +1,6 @@
 ﻿@page "/subs"
 @using ClassLibrary;
+@using PSI_MobileApp.DataServices;
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @using AccountDataSerializer
@@ -10,11 +11,11 @@
 @inject IdStateContainer IdContainer
 @inject NavigationManager NavigationManager
 @inject CurrentUserContainer CurrentUserContainer
-@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
+@inject IGetData data
 @implements IDisposable
 
 <h3>Subscriptions</h3>
-@if (Profile == null || Profile.Subscriptions == null)
+@if (Profile == null || Profile?.Subscriptions == null)
 {
 	<p><em>Loading...</em></p>
 }
@@ -49,9 +50,7 @@ else
 
 @code {
 	public Profile Profile { get; set; }
-	public List<Profile> DistributorProfiles { get; set; }
-	private ProjectDatabaseContext _context;
-
+	public ObservableCollection<Profile> DistributorProfiles { get; set; }
 	public void GoToDetailOnClick(Profile supplier)
 	{
 		StateContainer.OnChange += StateHasChanged;
@@ -70,30 +69,24 @@ else
 		{
 			Profile.Subscriptions.Add(distributor);
 		}
-		_context.SaveChanges();
 	}
 
 	protected override async Task OnInitializedAsync()
 	{
 		Debug.WriteLine("SubsInitialized");
-
-		_context = DbFactory.CreateDbContext();
-		if (_context != null && _context.Profiles != null)
+		StateContainer.OnChange += StateHasChanged;
+		Profile = null;
+		if(CurrentUserContainer.UserId != Guid.Empty)
 		{
-			StateContainer.OnChange += StateHasChanged;
-
 			Profile = CurrentUserContainer.GetUserProfile();
-			DistributorProfiles = _context.Profiles.ToList();
 		}
-
+		DistributorProfiles = await data.GetDistributorProfiles();
 
 		await base.OnInitializedAsync();
 	}
 	public void Dispose()
 	{
-		_context.SaveChanges();
 		StateContainer.OnChange -= StateHasChanged;
-		_context?.Dispose();
 	}
 
 }
