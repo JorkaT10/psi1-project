@@ -42,7 +42,7 @@ namespace WebApplication1.Controllers
         [HttpGet("~/GetAdsByBuyerId")]
         public async Task<List<Advertisement>> GetAdsByBuyerId(Guid id)
         {
-            var items = await _context.Advertisements.Include(a => a.Buyer).Where(elem => elem.Buyer.Id == id).ToListAsync();
+            var items = await _context.Advertisements.Include("Buyer").Include("Distributor").Where(elem => elem.Buyer != null && elem.Buyer.Id == id).ToListAsync();
             return items;
         }
         [HttpPut("~/AddAd")]
