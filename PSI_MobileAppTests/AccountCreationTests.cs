@@ -11,6 +11,7 @@ using PSI_MobileApp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using PSI_MobileApp.DataServices;
 
 namespace PSI_MobileAppTests
 {
@@ -23,7 +24,8 @@ namespace PSI_MobileAppTests
 			var configuration = new MudServicesConfiguration();
 			Context.Services.AddDbContextFactory<ProjectDatabaseContext>();
 			Context.Services.AddScoped<StateContainer>();
-			var comp = Context.RenderComponent<AccountCreation>();
+            Context.Services.AddSingleton<IGetData, GetData>();
+            var comp = Context.RenderComponent<AccountCreation>();
 			var form = comp.FindComponent<MudForm>().Instance;
 			Assert.NotNull(form);
 			var textFieldcomp = comp.FindComponents<MudTextField<string>>();
@@ -41,7 +43,8 @@ namespace PSI_MobileAppTests
 			var configuration = new MudServicesConfiguration();
 			Context.Services.AddDbContextFactory<ProjectDatabaseContext>();
 			Context.Services.AddScoped<StateContainer>();
-			var comp = Context.RenderComponent<AccountCreation>();
+            Context.Services.AddSingleton<IGetData, GetData>();
+            var comp = Context.RenderComponent<AccountCreation>();
 			var form = comp.FindComponent<MudForm>().Instance;
 			Assert.NotNull(form);
 			var textFieldcomp = comp.FindComponents<MudTextField<string>>();
@@ -68,7 +71,8 @@ namespace PSI_MobileAppTests
 			var configuration = new MudServicesConfiguration();
 			Context.Services.AddDbContextFactory<ProjectDatabaseContext>();
 			Context.Services.AddScoped<StateContainer>();
-			var comp = Context.RenderComponent<AccountCreation>();
+            Context.Services.AddSingleton<IGetData, GetData>();
+            var comp = Context.RenderComponent<AccountCreation>();
 			var form = comp.FindComponent<MudForm>().Instance;
 			Assert.NotNull(form);
 			var textFieldcomp = comp.FindComponents<MudTextField<string>>();
