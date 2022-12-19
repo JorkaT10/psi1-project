@@ -76,22 +76,17 @@ else
 	protected override async Task OnInitializedAsync()
 	{
 		Debug.WriteLine("SubsInitialized");
-		try
-		{
-			_context = DbFactory.CreateDbContext();
-			if (_context != null && _context.Profiles != null)
-			{
-				StateContainer.OnChange += StateHasChanged;
 
-				Profile = CurrentUserContainer.GetProfileFromDB(Logger, _context);
-				DistributorProfiles = _context.Profiles.ToList();
-			}
-
-		}
-		catch(Exception ex)
+		_context = DbFactory.CreateDbContext();
+		if (_context != null && _context.Profiles != null)
 		{
-			Logger.Log(ex);
+			StateContainer.OnChange += StateHasChanged;
+
+			Profile = CurrentUserContainer.GetUserProfile();
+			DistributorProfiles = _context.Profiles.ToList();
 		}
+
+
 		await base.OnInitializedAsync();
 	}
 	public void Dispose()

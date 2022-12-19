@@ -74,27 +74,21 @@ else
     {
         StateContainer.OnChange += StateHasChanged;
         _context = DbFactory.CreateDbContext();
-        try
+        mapOptions = new MapOptions()
         {
-            mapOptions = new MapOptions()
-            {
-                    Zoom = 13,
-                    Center = new LatLngLiteral()
-                    {
-                        Lat = 54.675892,
-                        Lng = 25.512093
-                    },
-                    MapTypeId = MapTypeId.Roadmap
-            };
+                Zoom = 13,
+                Center = new LatLngLiteral()
+                {
+                    Lat = 54.675892,
+                    Lng = 25.512093
+                },
+                MapTypeId = MapTypeId.Roadmap
+        };
 
-            UserReservations = _context.Advertisements.Include("Buyer").Include("Distributor").Where(i => i.Buyer.Id == CurrentUserContainer.UserId).ToList();
-            var DistributorIds = UserReservations.Select(i => i.Distributor.Id);
-            DistributorProfiles = _context.Profiles.Where(i => DistributorIds.Contains(i.Id)).ToList();
-        }
-        catch (Exception ex)
-        {
-            Logger.Log(ex);
-        }
+        UserReservations = _context.Advertisements.Include("Buyer").Include("Distributor").Where(i => i.Buyer.Id == CurrentUserContainer.UserId).ToList();
+        var DistributorIds = UserReservations.Select(i => i.Distributor.Id);
+        DistributorProfiles = _context.Profiles.Where(i => DistributorIds.Contains(i.Id)).ToList();
+
     }
 
     private async Task OnAfterInitAsync()

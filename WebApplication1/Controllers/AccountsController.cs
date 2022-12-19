@@ -36,7 +36,7 @@ namespace WebApplication1.Controllers
         [HttpGet("~/GetAccount")]
         public async virtual Task<Guid> GetAccount(string username, string password)
         {
-			throw new NotImplementedException();
+			//throw new NotImplementedException();
 			var account = await _context.Accounts.Where(a => a.Password.Equals(password) && a.UserName.Equals(username)).Select(a => a.Id).FirstOrDefaultAsync();
             return account;
         }

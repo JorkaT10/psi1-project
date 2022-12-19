@@ -2,19 +2,23 @@
 @using AccountDataSerializer
 @using ClassLibrary
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.EntityFrameworkCore.Storage;
-@using Npgsql;
+@using Microsoft.EntityFrameworkCore.Storage
+@using Npgsql
+@using MudBlazor
+@using MudBlazorFix
+@using PSI_MobileApp.DataServices;
 @using PSI_MobileApp.Extensions
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @using System.Net.NetworkInformation
-
-@using System.Diagnostics;
+@using System.Diagnostics
 @inject StateContainer StateContainer
 @inject IdStateContainer IdContainer
 @inject CurrentUserContainer CurrentUserContainer
 @inject NavigationManager NavigationManager
+@inject IGetData data
 @implements IDisposable
+
 
 
 <h3>Supplier List</h3>
@@ -23,9 +27,7 @@
 { 
     
     <div>
-    <input class="form-control" type="text" placeholder="Search"
-            @bind="Search"
-            @oninput="(e) =>  SearchCommand(e.Value.ToString())" />
+        <input class="form-control" type="text" placeholder="Search")" />
     </div>
 
 	<table class="table">
@@ -54,54 +56,45 @@
 else
 {
     <div>
-        <input class="form-control" type="text" placeholder="Search"
-                @bind="Search"
-                @oninput="(e) =>  SearchCommand(e.Value.ToString())" />
+        <input class="form-control" type="text" placeholder="Search" @bind="Search" @oninput="(e) => SearchCommand(e.Value.ToString())"/>
     </div>
 
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Name</th>
-				<th>Rating</th>
-                <th>Phone number</th>
-                <th>Cuisines</th>
-			</tr>
-		</thead>
-		<tbody>
-            @if (SearchResults != null)
-			{
-                foreach (var supplier in SearchResults)
-			    {
-                
-                <tr @onclick="()=>GoToDetailOnClick(supplier)">
-                    <td>@supplier.Name</td>
-                    <MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(
-                        context.Distributors.Where(d => d.Id == supplier.Id).FirstOrDefault().Rating)></MudRating>
-					<td>@supplier.PhoneNumber</td>
-                    <td>
-                        @foreach (var cuisine in supplier.CuisineArray)
-                        {
-                            @cuisine<br>
-                        }
-                    </td>
-
-                    @if(Profile != null && Profile.Subscriptions != null)
+    <MudTable Items="SearchResults" Hover="true" Breakpoint="Breakpoint.Sm" OnRowClick="@GoToDetailOnClick"  LoadingProgressColor="Color.Info" T="Profile">
+		<HeaderContent>
+				<MudTh>Name</MudTh>
+				<MudTh>Rating</MudTh>
+                <MudTh>Phone number</MudTh>
+                <MudTh>Cuisines</MudTh>
+                <MudTh>Subscribe</MudTh>
+		</HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Name</MudTd>
+            <MudTd><MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(Distributors.Where(d => d.Id == context.Id).FirstOrDefault().Rating)></MudRating></MudTd>
+            <MudTd>@context.PhoneNumber</MudTd>
+            <MudTd>
+                @foreach (var cuisine in context.CuisineArray)
+                {
+                    @cuisine
+                    <br/>
+                }
+            </MudTd>
+            <MudTd>
+                @if (Profile != null && Profile.Subscriptions != null)
+                {
+                    @if (Profile.Subscriptions.Contains(Distributors.First(d => d.Id == context.Id)))
                     {
-                        @if (Profile.Subscriptions.Contains(Distributors.First(d => d.Id == supplier.Id)))
-                        {
-                            <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(context.Distributors.First(d => d.Id == supplier.Id))">Unsubscribe</MudButton>
-                        }else
-                        {
-                            <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(context.Distributors.First(d => d.Id == supplier.Id))">Subscribe</MudButton>
-                        }   
+                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(data.GetDistributorsById(context.Id).Result)">Unsubscribe</MudButton>
                     }
-                    
-                    
-				</tr>
-			}
-		</tbody>
-    </table>
+                    else
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(data.GetDistributorsById(context.Id).Result)">Subscribe</MudButton>
+                    }
+                }
+            </MudTd>
+        </RowTemplate>
+           
+
+    </MudTable>
 }
 
 
@@ -137,9 +130,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
         ActivateTestConnection();
-        Profile = CurrentUserContainer.GetProfileFromDB(Logger, context);
+        Profile = CurrentUserContainer.GetProfileFromWeb();
         StateContainer.OnChange += StateHasChanged;
     }
 
@@ -152,10 +144,10 @@ else
     }
 
 
-    public void GoToDetailOnClick(Profile profile)
+    private void GoToDetailOnClick(TableRowClickEventArgs<Profile> tableRowClickEventArgs)
     {
         IdContainer.OnChange += StateHasChanged;
-        IdContainer.Id = profile.Id;
+        IdContainer.Id = tableRowClickEventArgs.Item.Id;
         NavigationManager.NavigateTo("/supplierdetails");
     }
 
@@ -164,7 +156,8 @@ else
         if (Profile.Subscriptions.Contains(distributor))
         {
             Profile.Subscriptions.Remove(distributor);
-        }else
+        }
+        else
         {
             Profile.Subscriptions.Add(distributor);
         }
@@ -173,27 +166,16 @@ else
 
     public void Dispose()
     {
-        context.SaveChanges();
-        //if(Profile == null)
-        //{
-        //    CurrentUserContainer.Logout(Logger, context);
-        //}
         StateContainer.OnChange -= StateHasChanged;
-        
+
     }
 
-    public async void Return()
+    public void Return()
     {
-        tryingToConnect = "Trying to reconnect..."; // don't know if should leave it like this or remove it since it returns back to homepage.
+        //tryingToConnect = "Trying to reconnect..."; // don't know if should leave it like this or remove it since it returns back to homepage.
         StateHasChanged();
-        if (!await context.TestConnection())
-        {
-            NavigationManager.NavigateTo("/", true);
-        }
-        else
-        {
-            tryingToConnect = string.Empty;
-        }
+        NavigationManager.NavigateTo("/", true);
+
     }
 
 
@@ -203,32 +185,28 @@ else
         {
             while (true)
             {
-                connected = await context.TestConnection();
-                if (connected)
-                    await GetDBData();
-                else
-                    errorOccured = "A network error occured. Please try again.";
-                await InvokeAsync(StateHasChanged);
-                await Task.Delay(10000);
+                using (ProjectDatabaseContext context = new())
+                {
+                    connected = await context.TestConnection();
+                    if (connected)
+                        await GetDBData();
+                    else
+                        errorOccured = "A network error occured. Please try again.";
+                    await InvokeAsync(StateHasChanged);
+                    await Task.Delay(10000);
+                }
             }
         });
     }
 
     async Task GetDBData()
     {
-        try
-        {
-            var distrib = await context.Distributors.Select(d => d.Id).ToObservableCollecionAsync();
-            Profiles = await context.Profiles.Where(p => distrib.Contains(p.Id)).ToObservableCollecionAsync();
-            Distributors = await context.Distributors.ToObservableCollecionAsync();
-        }
-        catch (Exception ex)
-        {
-            Logger.Log(ex);
-        }
+
+        Profiles = await data.GetDistributorProfiles();
+        Distributors = await data.GetAllDistributors();
+
         SearchResults = Profiles;
         await InvokeAsync(StateHasChanged);
     }
-
 
 }
