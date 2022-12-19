@@ -74,7 +74,7 @@
                        <MudTd DataLabel="Is Reserved">@(context.Buyer != null)</MudTd>
                     }
                 }
-                else if ((ProfileContainer.UserId != null) && (context.Buyer.Id == ProfileContainer.UserId || ProfileContainer.UserId == IdContainer.Id))
+                else if ((ProfileContainer.UserId != Guid.Empty) && (context.Buyer.Id == ProfileContainer.UserId || ProfileContainer.UserId == IdContainer.Id))
                 {
                     <MudTd DataLabel="Name">@context.MealName</MudTd>
                     <MudTd DataLabel="Time Of Making">@HandleTime(context.TimeOfMaking)</MudTd>
@@ -87,7 +87,7 @@
                 }
             </RowTemplate>
         </MudTable>
-        @if (ProfileContainer.UserId != null)
+        @if (ProfileContainer.UserId != Guid.Empty)
         {
             if (ProfileContainer.UserId == IdContainer.Id)
             {
@@ -227,7 +227,8 @@ else
     private async Task RemoveOrderCommand()
     {
         var allAdvertisements = await data.GetAllAdvertisements();
-        await data.RemoveAdvertisement(SelectedAdvertisement);
+        if (SelectedAdvertisement != null)
+            await data.RemoveAdvertisement(SelectedAdvertisement);
         await mudTable.ReloadServerData();
     }
 
@@ -277,7 +278,7 @@ else
         mudTable.SetSelectedItem(null);
         SelectedAdvertisement = null;
         await data.RemoveOutdated(DateTime.UtcNow);
-        IEnumerable<Advertisement> query = await data.GetAdsByDistributorId(profile.Id); // dbContext.Advertisements.Include(a => a.Buyer).Where(a => a.Distributor.Id == profile.Id);
+        IEnumerable<Advertisement> query = await data.GetAdsByDistributorId(IdContainer.Id); // dbContext.Advertisements.Include(a => a.Buyer).Where(a => a.Distributor.Id == profile.Id);
         await Task.Delay(300);
 
             switch (state.SortLabel)

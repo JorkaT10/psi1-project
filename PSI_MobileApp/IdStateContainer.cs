@@ -1,6 +1,6 @@
 ﻿namespace PSI_MobileApp
 {
-    internal class IdStateContainer
+    public class IdStateContainer
     {
         private Guid id;
         public Guid Id
