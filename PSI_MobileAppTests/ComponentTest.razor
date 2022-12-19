@@ -7,7 +7,7 @@
     public void Sidebar_Navigation_Should_Work()
     {
         using var ctx = new TestContext();
-        var cut = ctx.RenderComponent<PSI_MobileApp.Pages.Counter>();
+        var cut = ctx.RenderComponent<PSI_MobileApp.Pages.Index>();
 
         cut.Find("button").Click();
 

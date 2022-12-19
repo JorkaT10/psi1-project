@@ -12,8 +12,6 @@
 @inject StateContainer StateContainer
 @inject IdStateContainer IdContainer
 @inject NavigationManager NavigationManager
-@inject ExceptionLogger Logger
-@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
 
 
@@ -97,7 +95,6 @@ else
 @code {
     // private AccountDataSerializer<Profile> _dataSerializer;
     private ObservableCollection<Profile> _searchResult;
-    ProjectDatabaseContext context;
     private string canNotConnectText = string.Empty;
     private string errorOccured = string.Empty;
     private string tryingToConnect = string.Empty;
@@ -150,7 +147,7 @@ else
     public void Dispose()
     {
         StateContainer.OnChange -= StateHasChanged;
-        context.Dispose();
+        
     }
 
     public async void Return()

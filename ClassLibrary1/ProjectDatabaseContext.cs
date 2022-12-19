@@ -11,6 +11,10 @@ namespace ClassLibrary
         {
             optionsBuilder.UseNpgsql(_connectionString);
         }
+        public ProjectDatabaseContext(DbContextOptions<ProjectDatabaseContext> context) : base()
+        {
+
+        }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Profile> Profiles { get; set; }
         public DbSet<Distributor> Distributors { get; set; }

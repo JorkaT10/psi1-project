@@ -2,12 +2,12 @@
 @using ClassLibrary
 @using System.Collections.ObjectModel
 @using Microsoft.EntityFrameworkCore
+@using PSI_MobileApp.DataServices;
 @using PSI_MobileApp.Extensions
 @inject IdStateContainer IdContainer
 @inject CurrentUserContainer ProfileContainer
 @inject IDialogService DialogService
-@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
-@inject ExceptionLogger Logger
+@inject IGetData data
 @implements IDisposable
 
 <MudText Typo="Typo.h4">Supplier Details</MudText>
@@ -124,7 +124,6 @@ else
 
 
     @code {
-    private ProjectDatabaseContext dbContext;
     private ObservableCollection<Advertisement> adverts;
     private MudTable<Advertisement> mudTable;
     private Advertisement SelectedAdvertisement { get; set; }
@@ -198,28 +197,20 @@ else
 
     public async Task AddOrderCommand()
     {   
-        try
-        {
-            DialogOptions noHeader = new DialogOptions() { NoHeader = true };
-            var dialog = DialogService.Show<AddOrderDialog>("", noHeader);
-            var res = await dialog.Result;
+        DialogOptions noHeader = new DialogOptions() { NoHeader = true };
+        var dialog = DialogService.Show<AddOrderDialog>("", noHeader);
+        var res = await dialog.Result;
 
-            if (!res.Cancelled)
-            {
-                var adv = res.Data as Advertisement;
-                adv.Id = Guid.NewGuid();
-                var search = dbContext.Distributors.Where(d => d.Id == IdContainer.Id).FirstOrDefault();
-                adv.Distributor = search;
-                dbContext.Add<Advertisement>(adv as Advertisement);
-                selectedRowNumber = -1;
-                mudTable.SetSelectedItem(null);
-                await dbContext.SaveChangesAsync();
-                await mudTable.ReloadServerData();
-            }
-        }
-        catch(Exception ex)
+        if (!res.Cancelled)
         {
-            Logger.Log(ex);
+            var adv = res.Data as Advertisement;
+            adv.Id = Guid.NewGuid();
+            var search = await data.GetDistributorsById(IdContainer.Id);//dbContext.Distributors.Where(d => d.Id == IdContainer.Id).FirstOrDefault();
+            adv.Distributor = search;
+            await data.AddAd(adv as Advertisement, search.Id);
+            selectedRowNumber = -1;
+            mudTable.SetSelectedItem(null);
+            await mudTable.ReloadServerData();
         }
 
     }
@@ -238,19 +229,9 @@ else
 
     private async Task RemoveOrderCommand()
     {
-        try
-        {
-            if (dbContext.Advertisements.Contains(SelectedAdvertisement))
-            {
-                dbContext.Advertisements.Remove(SelectedAdvertisement);
-                await dbContext.SaveChangesAsync();
-                await mudTable.ReloadServerData();
-            }
-        }
-        catch(Exception ex)
-        {
-            Logger.Log(ex);
-        }
+        var allAdvertisements = await data.GetAllAdvertisements();
+        await data.RemoveAdvertisement(SelectedAdvertisement);
+        await mudTable.ReloadServerData();
     }
 
     private async Task BookOrderCommand()
@@ -282,11 +263,6 @@ else
                 }
                 SelectedAdvertisement = null;
 
-            }
-        }
-        catch(Exception ex)
-        {
-            Logger.Log(ex);
         }
 
     }
@@ -294,7 +270,6 @@ else
     public void Dispose()
     {
         IdContainer.OnChange -= StateHasChanged;
-        dbContext.Dispose();
     }
 
     private string HandleTime(DateTime time)
@@ -306,14 +281,12 @@ else
     private int totalItems;
     private async Task<TableData<Advertisement>> ServerReload(TableState state)
     {
-        try
-        {
-            selectedRowNumber = -1;
-            mudTable.SetSelectedItem(null);
-            SelectedAdvertisement = null;
-            await RemoveOutOfDate(dbContext);
-            var query = dbContext.Advertisements.Include(a => a.Buyer).Where(a => a.Distributor.Id == profile.Id);
-            await Task.Delay(300);
+        selectedRowNumber = -1;
+        mudTable.SetSelectedItem(null);
+        SelectedAdvertisement = null;
+        await data.RemoveOutdated(DateTime.UtcNow);
+        IEnumerable<Advertisement> query = await data.GetAdsByDistributorId(profile.Id); // dbContext.Advertisements.Include(a => a.Buyer).Where(a => a.Distributor.Id == profile.Id);
+        await Task.Delay(300);
 
             switch (state.SortLabel)
             {
@@ -338,16 +311,11 @@ else
             }
 
             totalItems = query.Count();
-            pagedData = await query.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArrayAsync();
+            pagedData = query.Skip(state.Page * state.PageSize).Take(state.PageSize);
             return new TableData<Advertisement>() { TotalItems = totalItems, Items = pagedData };
-        }
-        catch(Exception ex)
-        {
-            Logger.Log(ex);
-            return null;
-        }
-        
+
     }
+}
 
     public async Task RemoveOutOfDate(ProjectDatabaseContext context)
     {

@@ -23,7 +23,6 @@ namespace PSI_MobileAppTests
 			var configuration = new MudServicesConfiguration();
 			Context.Services.AddDbContextFactory<ProjectDatabaseContext>();
 			Context.Services.AddScoped<StateContainer>();
-			Context.Services.AddScoped<ExceptionLogger>();
 			var comp = Context.RenderComponent<AccountCreation>();
 			var form = comp.FindComponent<MudForm>().Instance;
 			Assert.NotNull(form);
@@ -42,7 +41,6 @@ namespace PSI_MobileAppTests
 			var configuration = new MudServicesConfiguration();
 			Context.Services.AddDbContextFactory<ProjectDatabaseContext>();
 			Context.Services.AddScoped<StateContainer>();
-			Context.Services.AddScoped<ExceptionLogger>();
 			var comp = Context.RenderComponent<AccountCreation>();
 			var form = comp.FindComponent<MudForm>().Instance;
 			Assert.NotNull(form);
@@ -70,7 +68,6 @@ namespace PSI_MobileAppTests
 			var configuration = new MudServicesConfiguration();
 			Context.Services.AddDbContextFactory<ProjectDatabaseContext>();
 			Context.Services.AddScoped<StateContainer>();
-			Context.Services.AddScoped<ExceptionLogger>();
 			var comp = Context.RenderComponent<AccountCreation>();
 			var form = comp.FindComponent<MudForm>().Instance;
 			Assert.NotNull(form);
