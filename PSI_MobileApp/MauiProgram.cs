@@ -1,4 +1,5 @@
 ﻿using ClassLibrary;
+using GoogleMapsComponents;
 using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,7 @@ public static class MauiProgram
 			});
 		builder.Services.AddMauiBlazorWebView();
         builder.Services.AddMudServices();
+		builder.Services.AddBlazorGoogleMaps();
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
 #endif

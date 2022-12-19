@@ -4,6 +4,8 @@
 @using PSI_MobileApp.Extensions;
 @using ProfileClasses
 @using Microsoft.EntityFrameworkCore
+@using GoogleMapsComponents
+@using GoogleMapsComponents.Maps
 @inject StateContainer StateContainer
 @inject CurrentUserContainer CurrentUserContainer
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
@@ -17,30 +19,46 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Meal Name</th>
-                <th>Distributor</th>
-                <th>Reserved until</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach(var reservation in UserReservations)
-            {
+    <div style="margin-bottom:40px; height:100px;">
+        <GoogleMap @ref="@map1" Id="map1" Options="@mapOptions" Height="100%" OnAfterInit="@(async () => await OnAfterInitAsync())"></GoogleMap>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="@(_ => AddDirections())">Add Direction</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="@( _distanceTotalString => RemoveRoute())">Remove route</MudButton>
+    </div>
+
+    <div style="margin-top:20px; margin-bottom:20px; min-height:100px">
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>@reservation.MealName</td>
-                    <td>@GetDistributorName(reservation) </td>
-                    <td>@reservation.PickupTimeSpan</td>
+                    <th>Meal Name</th>
+                    <th>Distributor</th>
+                    <th>Reserved until</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var reservation in UserReservations)
+                {
+                    <tr>
+                        <td>@reservation.MealName</td>
+                        <td>@GetDistributorName(reservation) </td>
+                        <td>@reservation.PickupTimeSpan</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    
 }
 
 @code {
-    public ObservableCollection<Advertisement> UserReservations { get; set; }
+    public List<Advertisement> UserReservations { get; set; }
+    public List<DirectionsWaypoint> Waypoints { get; set; }
+    public List<Profile> DistributorProfiles { get; set; }
     private ProjectDatabaseContext _context;
+    private GoogleMap map1;
+    private MapOptions mapOptions;
+    private DirectionsRenderer dirRend;
+    private string _durationTotalString;
+    private string _distanceTotalString;
 
     public Reservations()
     {
@@ -56,8 +74,98 @@ else
     {
         StateContainer.OnChange += StateHasChanged;
         _context = DbFactory.CreateDbContext();
-        UserReservations = _context.Advertisements.Include("Buyer").Include("Distributor").Where(i => i.Buyer.Id == CurrentUserContainer.UserId).ToObservableCollection();
-}
+        try
+        {
+            mapOptions = new MapOptions()
+            {
+                    Zoom = 13,
+                    Center = new LatLngLiteral()
+                    {
+                        Lat = 54.675892,
+                        Lng = 25.512093
+                    },
+                    MapTypeId = MapTypeId.Roadmap
+            };
+
+            UserReservations = _context.Advertisements.Include("Buyer").Include("Distributor").Where(i => i.Buyer.Id == CurrentUserContainer.UserId).ToList();
+            var DistributorIds = UserReservations.Select(i => i.Distributor.Id);
+            DistributorProfiles = _context.Profiles.Where(i => DistributorIds.Contains(i.Id)).ToList();
+        }
+        catch (Exception ex)
+        {
+            Logger.Log(ex);
+        }
+    }
+
+    private async Task OnAfterInitAsync()
+    {
+        dirRend = await DirectionsRenderer.CreateAsync(map1.JsRuntime, new DirectionsRendererOptions()
+        {
+            Map = map1.InteropObject
+        });
+    }
+
+    private async Task AddDirections()
+    {
+        _durationTotalString = null;
+        _distanceTotalString = null;
+        if (await dirRend.GetMap() is null) await dirRend.SetMap(map1.InteropObject);
+
+        //Adding route waypoints
+        Waypoints = new();
+        var user = CurrentUserContainer.GetUserProfile();
+        var userLocation = user.TypedAddress.StreetName + " " + user.TypedAddress.StreetNumber + ", " + user.TypedAddress.City + " LT";
+        Waypoints.Add(new DirectionsWaypoint()
+        {
+                Location = userLocation
+        });
+
+        //DistributorProfiles.ForEach(w =>
+        //{
+        //    Waypoints.Add(new DirectionsWaypoint() { 
+        //        Location = w.TypedAddress.StreetName + " " + w.TypedAddress.StreetNumber + ", " + w.TypedAddress.City + " LT"
+        //        , Stopover = true });
+        //});
+
+        Waypoints.Add(new DirectionsWaypoint()
+        {
+            Location = "Didlaukio st. 47, Vilnius LT"
+        });
+        Waypoints.Add(new DirectionsWaypoint()
+        {
+            Location = "Ateities st. 47, Vilnius LT"
+        });
+        Waypoints.Add(new DirectionsWaypoint()
+        {
+            Location = "Geležinio Vilko g. st. 47, Vilnius LT"
+        });
+
+        if(Waypoints.Count != 0)
+        {
+            DirectionsRequest dr = new DirectionsRequest();
+            dr.Origin = Waypoints.First().Location;
+            dr.Destination = Waypoints.Last().Location;
+            dr.Waypoints = Waypoints;
+            dr.TravelMode = TravelMode.Driving;
+            //dr.OptimizeWaypoints = true;
+
+            var directionsResult = await dirRend.Route(dr);
+            foreach (var route in directionsResult.Routes.SelectMany(x => x.Legs))
+            {
+                _durationTotalString += route.Duration.Text;
+                _distanceTotalString += route.Distance.Text;
+            }
+        }
+    }
+
+    private async Task RemoveRoute()
+    {
+        await dirRend.SetMap(null);
+
+        _durationTotalString = null;
+        _distanceTotalString = null;
+    }
+
     public void Dispose()
     {
         StateContainer.OnChange -= StateHasChanged;

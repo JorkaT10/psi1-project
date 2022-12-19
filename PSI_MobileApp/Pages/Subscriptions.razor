@@ -4,7 +4,10 @@
 @using System.Collections.ObjectModel
 @using AccountDataSerializer
 @using Microsoft.EntityFrameworkCore
+@using PSI_MobileApp.Extensions
+@using System.Diagnostics;
 @inject StateContainer StateContainer
+@inject IdStateContainer IdContainer
 @inject NavigationManager NavigationManager
 @inject CurrentUserContainer CurrentUserContainer
 @inject IDbContextFactory<ProjectDatabaseContext> DbFactory
@@ -32,7 +35,7 @@ else
 						<td @onclick="()=>GoToDetailOnClick(DistributorProfiles.First(i => supplier.Id == i.Id))">@DistributorProfiles.First(i => supplier.Id == i.Id).Name</td>
 						<MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(supplier.Rating)></MudRating>
 						<td>
-							@foreach (var cuisine in DistributorProfiles.Where(elem => elem.Id == supplier.Id))
+							@foreach (var cuisine in DistributorProfiles.First(i => supplier.Id == i.Id).CuisineArray)
 							{
 								@cuisine.ToString()<br>
 							}
@@ -49,47 +52,51 @@ else
 	public List<Profile> DistributorProfiles { get; set; }
 	private ProjectDatabaseContext _context;
 
-	public Subscriptions()
-	{
-
-	}
-
 	public void GoToDetailOnClick(Profile supplier)
 	{
+		StateContainer.OnChange += StateHasChanged;
 		StateContainer.Supplier = supplier;
-		NavigationManager.NavigateTo("/supplierlist/supplierdetails");
+		IdContainer.Id = supplier.Id;
+		NavigationManager.NavigateTo("/../supplierdetails");
 	}
 
 	public void ChangeSubscriptionStatus(Distributor distributor)
 	{
-
-		if (!Profile.Subscriptions.Contains(distributor))
-		{
-			Profile.Subscriptions.Add(distributor);
-		}
-		else
+		if (Profile.Subscriptions.Contains(distributor))
 		{
 			Profile.Subscriptions.Remove(distributor);
 		}
+		else
+		{
+			Profile.Subscriptions.Add(distributor);
+		}
+		_context.SaveChanges();
 	}
 
 	protected override async Task OnInitializedAsync()
 	{
-		_context = DbFactory.CreateDbContext();
-
-		if (_context != null && _context.Profiles != null)
+		Debug.WriteLine("SubsInitialized");
+		try
 		{
-			StateContainer.OnChange += StateHasChanged;
+			_context = DbFactory.CreateDbContext();
+			if (_context != null && _context.Profiles != null)
+			{
+				StateContainer.OnChange += StateHasChanged;
 
-			Profile = CurrentUserContainer.GetUserProfile();
-			DistributorProfiles = _context.Profiles.ToList();
+				Profile = CurrentUserContainer.GetProfileFromDB(Logger, _context);
+				DistributorProfiles = _context.Profiles.ToList();
+			}
+
 		}
-
+		catch(Exception ex)
+		{
+			Logger.Log(ex);
+		}
 		await base.OnInitializedAsync();
 	}
-
 	public void Dispose()
 	{
+		_context.SaveChanges();
 		StateContainer.OnChange -= StateHasChanged;
 		_context?.Dispose();
 	}

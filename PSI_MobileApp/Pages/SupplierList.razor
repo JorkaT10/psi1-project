@@ -9,8 +9,10 @@
 @using System.Collections.ObjectModel
 @using System.Net.NetworkInformation
 
+@using System.Diagnostics;
 @inject StateContainer StateContainer
 @inject IdStateContainer IdContainer
+@inject CurrentUserContainer CurrentUserContainer
 @inject NavigationManager NavigationManager
 @implements IDisposable
 
@@ -72,21 +74,32 @@ else
                 foreach (var supplier in SearchResults)
 			    {
                 
-                    <tr @onclick="()=>GoToDetailOnClick(supplier)">
-                        <td>@supplier.Name</td>
-                       
-                        <td>@(Distributors.Where(d => d.Id == supplier.Id).FirstOrDefault().Rating)</td>
-                        
-					    <td>@supplier.PhoneNumber</td>
-                        <td>
-                            @foreach (var cuisine in supplier.CuisineArray)
-                            {
-                                @cuisine<br>
-                            }
-                        </td>
-				    </tr>
-			    }
-            }
+                <tr @onclick="()=>GoToDetailOnClick(supplier)">
+                    <td>@supplier.Name</td>
+                    <MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(
+                        context.Distributors.Where(d => d.Id == supplier.Id).FirstOrDefault().Rating)></MudRating>
+					<td>@supplier.PhoneNumber</td>
+                    <td>
+                        @foreach (var cuisine in supplier.CuisineArray)
+                        {
+                            @cuisine<br>
+                        }
+                    </td>
+
+                    @if(Profile != null && Profile.Subscriptions != null)
+                    {
+                        @if (Profile.Subscriptions.Contains(Distributors.First(d => d.Id == supplier.Id)))
+                        {
+                            <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(context.Distributors.First(d => d.Id == supplier.Id))">Unsubscribe</MudButton>
+                        }else
+                        {
+                            <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(context.Distributors.First(d => d.Id == supplier.Id))">Subscribe</MudButton>
+                        }   
+                    }
+                    
+                    
+				</tr>
+			}
 		</tbody>
     </table>
 }
@@ -99,6 +112,7 @@ else
     private string errorOccured = string.Empty;
     private string tryingToConnect = string.Empty;
     private bool connected;
+    public Profile Profile { get; set; }
     public ObservableCollection<Profile> SearchResults
     {
         get
@@ -125,6 +139,7 @@ else
     {
         context = DbFactory.CreateDbContext();
         ActivateTestConnection();
+        Profile = CurrentUserContainer.GetProfileFromDB(Logger, context);
         StateContainer.OnChange += StateHasChanged;
     }
 
@@ -141,11 +156,28 @@ else
     {
         IdContainer.OnChange += StateHasChanged;
         IdContainer.Id = profile.Id;
-        NavigationManager.NavigateTo("/supplierlist/supplierdetails");
+        NavigationManager.NavigateTo("/supplierdetails");
+    }
+
+    public void ChangeSubscriptionStatus(Distributor distributor)
+    {
+        if (Profile.Subscriptions.Contains(distributor))
+        {
+            Profile.Subscriptions.Remove(distributor);
+        }else
+        {
+            Profile.Subscriptions.Add(distributor);
+        }
+        //context.SaveChanges();
     }
 
     public void Dispose()
     {
+        context.SaveChanges();
+        //if(Profile == null)
+        //{
+        //    CurrentUserContainer.Logout(Logger, context);
+        //}
         StateContainer.OnChange -= StateHasChanged;
         
     }
