@@ -33,5 +33,7 @@ namespace PSI_MobileApp.DataServices
         Task ChangeOrderStatus(Guid advertisementId, Guid id);
         Task<Guid> GetAccount(string username, string password);
         Task UpdateProfile();
+        Task ChangeSubscriptionStatus(Guid distributorId, Guid subscriberId);
+        ObservableCollection<Account> GetAllAccountsConcurrent();
     }
 }

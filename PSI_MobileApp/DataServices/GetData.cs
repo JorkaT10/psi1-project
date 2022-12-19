@@ -380,5 +380,32 @@ namespace PSI_MobileApp.DataServices
                 }
             }
         }
+        public async Task ChangeSubscriptionStatus(Guid distributorId, Guid subscriberId)
+        {
+            using (var client = new HttpClient())
+            {
+                string url = $"{_baseUrl}/ChangeSubscriptionStatus?distributorId={distributorId}&subscriberId={subscriberId}";
+                var apiResponse = await client.GetAsync(url);
+                if (!apiResponse.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException();
+                }
+            }
+        }
+        public ObservableCollection<Account> GetAllAccountsConcurrent()
+        {
+            var returnResponse = new ObservableCollection<Account>();
+            using (var client = new HttpClient())
+            {
+                string url = $"{_baseUrl}/GetAllAccounts";
+                var apiResponse = client.GetAsync(url).Result;
+                if (apiResponse.IsSuccessStatusCode)
+                {
+                    var response = apiResponse.Content.ReadAsStringAsync().Result;
+                    returnResponse = JsonConvert.DeserializeObject<ObservableCollection<Account>>(response);
+                }
+            }
+            return returnResponse;
+        }
     }
 }

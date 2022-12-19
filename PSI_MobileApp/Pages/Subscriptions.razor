@@ -41,7 +41,7 @@ else
 								@cuisine.ToString()<br>
 							}
 						</td>
-						<MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(supplier)">Unsubscribe</MudButton>
+					<MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="async ()=> await ChangeSubscriptionStatus(supplier.Id)">Unsubscribe</MudButton>
 					</tr>
 				}
 		</tbody>
@@ -59,16 +59,11 @@ else
 		NavigationManager.NavigateTo("/../supplierdetails");
 	}
 
-	public void ChangeSubscriptionStatus(Distributor distributor)
+	public async Task ChangeSubscriptionStatus(Guid distributorId)
 	{
-		if (Profile.Subscriptions.Contains(distributor))
-		{
-			Profile.Subscriptions.Remove(distributor);
-		}
-		else
-		{
-			Profile.Subscriptions.Add(distributor);
-		}
+		await data.ChangeSubscriptionStatus(distributorId, CurrentUserContainer.UserId);
+		var distributor = await data.GetDistributorsById(distributorId);
+		//context.SaveChanges();
 	}
 
 	protected override async Task OnInitializedAsync()
@@ -78,7 +73,7 @@ else
 		Profile = null;
 		if(CurrentUserContainer.UserId != Guid.Empty)
 		{
-			Profile = CurrentUserContainer.GetUserProfile();
+			Profile = await data.GetProfileById(CurrentUserContainer.UserId);
 		}
 		DistributorProfiles = await data.GetDistributorProfiles();
 

@@ -115,7 +115,7 @@
 
     public string IsUniqueUsername(string username)
     {
-        if(data.GetAllAccounts().Result.All(a => !a.UserName.Equals(username)))
+        if(data.GetAllAccountsConcurrent().All(a => !a.UserName.Equals(username)))
         {
             return null;
         }

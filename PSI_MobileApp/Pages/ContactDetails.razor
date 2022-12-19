@@ -10,7 +10,6 @@
 @inject StateContainer StateContainer
 @inject CurrentUserContainer CurrentUserContainer
 @inject NavigationManager NavigationManager
-@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
 <h3>Input Contact Data</h3>
 @if ((CurrentUserContainer.UserId != Guid.Empty))
@@ -68,7 +67,7 @@ else
         }
         else
         {
-            Address address = new();
+            /*Address address = new();
             if (StateContainer.CreatingDistributor)
             {
                 StateContainer.TempProfile.Name = DistributorName;
@@ -91,7 +90,7 @@ else
                 }
             }
             
-            NavigationManager.NavigateTo("profile");
+            NavigationManager.NavigateTo("profile");*/
         }
     }
 

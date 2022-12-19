@@ -25,7 +25,7 @@ namespace WebApplication1.Controllers
         [HttpGet("~/GetProfileById")]
         public async Task<Profile> GetProfileById(Guid id)
         {
-            var items = await _context.Profiles.Where(elem => elem.Id == id).FirstOrDefaultAsync();
+            var items = await _context.Profiles.Include(a => a.Subscriptions).Where(elem => elem.Id == id).FirstOrDefaultAsync();
             return items;
         }
         [HttpGet("~/GetDistributorProfiles")]
@@ -44,6 +44,26 @@ namespace WebApplication1.Controllers
         [HttpPut("~/Update")]
         public async Task UpdateProfile()
         {
+            await _context.SaveChangesAsync();
+        }
+        [HttpGet("~/ChangeSubscriptionStatus")]
+        public async Task ChangeSubscriptionStatus(Guid distributorId, Guid subscriberId)
+        {
+            var profile = await _context.Profiles.Include(a => a.Subscriptions).Where(profile => profile.Id == subscriberId).FirstOrDefaultAsync();
+            var distributor = await _context.Distributors.Where(distributor => distributor.Id == distributorId).FirstOrDefaultAsync();
+            if (profile.Subscriptions?.Contains(distributor) == true)
+            {
+                profile.Subscriptions.Remove(distributor);
+            }
+            else if(profile.Subscriptions == null)
+            {
+                profile.Subscriptions = new();
+                profile.Subscriptions.Add(distributor);
+            }
+            else
+            {
+                profile.Subscriptions.Add(distributor);
+            }
             await _context.SaveChangesAsync();
         }
     }
