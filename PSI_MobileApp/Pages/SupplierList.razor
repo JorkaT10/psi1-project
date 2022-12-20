@@ -139,7 +139,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        Profile = null;
+        Profile = await data.GetProfileById(CurrentUserContainer.UserId);
         ActivateTestConnection();
         StateContainer.OnChange += StateHasChanged;
     }
@@ -166,6 +166,7 @@ else
         await data.ChangeSubscriptionStatus(distributorId, CurrentUserContainer.UserId);
         var distributor = await data.GetDistributorsById(distributorId);
         //context.SaveChanges();
+        Profile = await data.GetProfileById(CurrentUserContainer.UserId);
         await mudTable.ReloadServerData();
     }
 
