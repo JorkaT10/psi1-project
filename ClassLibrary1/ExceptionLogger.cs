@@ -10,7 +10,8 @@ namespace PSI_MobileApp
     {
         private string path = "C:\\Users\\Matas\\Log.txt";
         private FileStream fileStream;
-        public ExceptionLogger() {
+        public ExceptionLogger()
+        {
             if (!File.Exists(path))
             {
                 fileStream = File.Create(path);
