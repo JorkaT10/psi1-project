@@ -56,6 +56,8 @@ namespace WebApplication1
 
 			this.AutofacContainer = app.ApplicationServices.GetAutofacRoot();
 
+			app.UseMiddleware<ExceptionLoggingMiddleware>();
+
 			app.UseExceptionHandler("/error");
 
 			app.UseHttpsRedirection();
