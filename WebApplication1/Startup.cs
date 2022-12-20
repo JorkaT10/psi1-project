@@ -37,7 +37,10 @@ namespace WebApplication1
 		public void ConfigureContainer(ContainerBuilder builder)
 		{
 			builder.RegisterType<AccountsController>().EnableClassInterceptors().InterceptedBy(typeof(LoggingInterceptor));
-			builder.RegisterType<LoggingInterceptor>().SingleInstance();
+            builder.RegisterType<ProfilesController>().EnableClassInterceptors().InterceptedBy(typeof(LoggingInterceptor));
+            builder.RegisterType<AdvertisementsController>().EnableClassInterceptors().InterceptedBy(typeof(LoggingInterceptor));
+            builder.RegisterType<DistributorController>().EnableClassInterceptors().InterceptedBy(typeof(LoggingInterceptor));
+            builder.RegisterType<LoggingInterceptor>().SingleInstance();
 
 		}
 
@@ -53,6 +56,7 @@ namespace WebApplication1
 
 			this.AutofacContainer = app.ApplicationServices.GetAutofacRoot();
 
+			app.UseExceptionHandler("/error");
 
 			app.UseHttpsRedirection();
 

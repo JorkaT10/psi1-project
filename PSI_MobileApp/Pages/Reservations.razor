@@ -1,6 +1,7 @@
 ﻿@page "/reservations"
 @using System.Collections.ObjectModel;
 @using ClassLibrary
+@using PSI_MobileApp.DataServices;
 @using PSI_MobileApp.Extensions;
 @using ProfileClasses
 @using Microsoft.EntityFrameworkCore
@@ -8,7 +9,7 @@
 @using GoogleMapsComponents.Maps
 @inject StateContainer StateContainer
 @inject CurrentUserContainer CurrentUserContainer
-@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
+@inject IGetData data
 @implements IDisposable
 
 <h3>Reservations</h3>
@@ -50,10 +51,9 @@ else
 }
 
 @code {
-    public List<Advertisement> UserReservations { get; set; }
+    public ObservableCollection<Advertisement> UserReservations { get; set; }
     public List<DirectionsWaypoint> Waypoints { get; set; }
-    public List<Profile> DistributorProfiles { get; set; }
-    private ProjectDatabaseContext _context;
+    public ObservableCollection<Profile> DistributorProfiles { get; set; }
     private GoogleMap map1;
     private MapOptions mapOptions;
     private DirectionsRenderer dirRend;
@@ -67,13 +67,12 @@ else
 
     public string GetDistributorName(Advertisement adv)
     {
-        return _context.Profiles.Where(elem => elem.Id == adv.Distributor.Id).FirstOrDefault().Name;
+        return DistributorProfiles.Where(a => a.Id == adv.Distributor.Id).First().Name;
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         StateContainer.OnChange += StateHasChanged;
-        _context = DbFactory.CreateDbContext();
         mapOptions = new MapOptions()
         {
                 Zoom = 13,
@@ -85,9 +84,8 @@ else
                 MapTypeId = MapTypeId.Roadmap
         };
 
-        UserReservations = _context.Advertisements.Include("Buyer").Include("Distributor").Where(i => i.Buyer.Id == CurrentUserContainer.UserId).ToList();
-        var DistributorIds = UserReservations.Select(i => i.Distributor.Id);
-        DistributorProfiles = _context.Profiles.Where(i => DistributorIds.Contains(i.Id)).ToList();
+        UserReservations = await data.GetAdsByBuyerId(CurrentUserContainer.UserId);
+        DistributorProfiles = await data.GetDistributorProfiles();
 
     }
 
@@ -107,7 +105,7 @@ else
 
         //Adding route waypoints
         Waypoints = new();
-        var user = CurrentUserContainer.GetUserProfile();
+        var user = await data.GetProfileById(CurrentUserContainer.UserId);
         var userLocation = user.TypedAddress.StreetName + " " + user.TypedAddress.StreetNumber + ", " + user.TypedAddress.City + " LT";
         Waypoints.Add(new DirectionsWaypoint()
         {
@@ -163,7 +161,6 @@ else
     public void Dispose()
     {
         StateContainer.OnChange -= StateHasChanged;
-        _context.Dispose();
     }
 
 }

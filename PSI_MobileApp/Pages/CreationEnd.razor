@@ -40,7 +40,9 @@ else
         await data.AddNewProfile(StateContainer.TempProfile);
         if (StateContainer.CreatingDistributor)
         {
-            await data.AddDistributor(StateContainer.TempAccount.Id);
+            Distributor distributor = new();
+            distributor.Id = StateContainer.TempAccount.Id;
+            await data.AddDistributor(distributor);
         }
         createSuccessfully = true;
     }

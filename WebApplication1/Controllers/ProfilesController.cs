@@ -66,5 +66,14 @@ namespace WebApplication1.Controllers
             }
             await _context.SaveChangesAsync();
         }
+        [HttpPut("~/ChangeContactData")]
+        public async Task ChangeContactData([FromBody] Address address, string name, string phone, Guid id)
+        {
+            var profile = await _context.Profiles.Where(profile => profile.Id == id).FirstOrDefaultAsync();
+            profile.TypedAddress = address;
+            profile.Name = name;
+            profile.PhoneNumber = phone;
+            await _context.SaveChangesAsync();
+        }
     }
 }

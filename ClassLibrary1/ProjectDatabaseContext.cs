@@ -6,7 +6,7 @@ namespace ClassLibrary
 {
     public class ProjectDatabaseContext : DbContext
     {
-        private readonly string _connectionString = "Server=localhost;Port=49153;Database=pg;Uid=postgres;Pwd=postgrespw;";
+        private readonly string _connectionString = "Server=localhost;Port=5432;Database=postgres;Uid=postgres;Pwd=postgrepw;";
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(_connectionString);
@@ -25,21 +25,13 @@ namespace ClassLibrary
         public DbSet<Advertisement> Advertisements { get; set; }
 
 
-        public async Task<bool> TestConnection()
+        public void TestConnection()
         {
-            await using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
+            using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
             {
-                try
-                {
-                    await conn.OpenAsync();
+                    conn.Open();
                     var connected = (conn.State == System.Data.ConnectionState.Open);
-                    await conn.CloseAsync();
-                    return connected;
-                }
-                catch
-                {
-                    return false;
-                }
+                    conn.Close();
             }
         }
 

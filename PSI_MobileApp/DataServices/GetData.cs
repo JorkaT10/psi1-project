@@ -10,6 +10,7 @@ using ClassLibrary;
 using System.Net.Http.Json;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Web.Http;
 
 namespace PSI_MobileApp.DataServices
 {
@@ -269,12 +270,12 @@ namespace PSI_MobileApp.DataServices
             }
             return returnResponse;
         }
-        public async Task AddDistributor(Guid id)
+        public async Task AddDistributor(Distributor distributor)
         {
             using (var client = new HttpClient())
             {
-                string url = $"{_baseUrl}/AddDistributor";
-                var apiResponse = await client.PutAsJsonAsync(url, id);
+                string url = $"{_baseUrl}/AddDistributors";
+                var apiResponse = await client.PutAsJsonAsync(url, distributor);
                 if (!apiResponse.IsSuccessStatusCode)
                 {
                     throw new HttpRequestException();
@@ -406,6 +407,41 @@ namespace PSI_MobileApp.DataServices
                 }
             }
             return returnResponse;
+        }
+        public async Task<bool> TestConnection()
+        {
+            using (var client = new HttpClient())
+            {
+                string url = $"{_baseUrl}/TestConnection";
+                try
+                {
+                    var apiResponse = await client.GetAsync(url);
+                    if (apiResponse.IsSuccessStatusCode)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+                catch(Exception ex)
+                {
+                    return false;
+                }
+                
+                
+            }
+        }
+        public async Task ChangeContactData(Address address, string name, string phone, Guid id)
+        {
+            using (var client = new HttpClient())
+            {
+                string url = $"{_baseUrl}/ChangeContactData?name={name}&phone={phone}&id={id}";
+                var str = JsonConvert.SerializeObject(address);
+                var apiResponse = await client.PutAsJsonAsync(url, address);
+                if (!apiResponse.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException();
+                }
+            }
         }
     }
 }

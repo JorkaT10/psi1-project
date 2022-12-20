@@ -2,6 +2,7 @@
 @using AccountDataSerializer
 @using Microsoft.EntityFrameworkCore;
 @using Newtonsoft.Json
+@using PSI_MobileApp.DataServices;
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @using System.Text.Json
@@ -11,6 +12,7 @@
 @inject CurrentUserContainer CurrentUserContainer
 @inject NavigationManager NavigationManager
 @implements IDisposable
+@inject IGetData data
 <h3>Input Contact Data</h3>
 @if ((CurrentUserContainer.UserId != Guid.Empty))
 {
@@ -49,7 +51,7 @@ else
     public int? StreetNumber;
     public bool isValid;
     public string DistributorName = string.Empty;
-    public void HandleValidSubmit()
+    public async Task HandleValidSubmit()
     {
         if ((CurrentUserContainer.UserId == Guid.Empty))
         {
@@ -67,32 +69,27 @@ else
         }
         else
         {
-            /*Address address = new();
+            Profile profile = await data.GetProfileById(CurrentUserContainer.UserId);
+            ContactData contactData = new();
+            Address address = new();
             if (StateContainer.CreatingDistributor)
             {
                 StateContainer.TempProfile.Name = DistributorName;
             }
-            address.StreetNumber = StreetNumber == null ? CurrentUserContainer.GetUserProfile().TypedAddress.StreetNumber : (int)StreetNumber;
-            address.StreetName = StreetName == null ? CurrentUserContainer.GetUserProfile().TypedAddress.StreetName : StreetName;
-            address.City = City == null ? CurrentUserContainer.GetUserProfile().TypedAddress.City : City;
-            Phone ??= CurrentUserContainer.GetUserProfile().PhoneNumber;
-            using (var db = DbFactory.CreateDbContext())
-            {
-                var result = db.Profiles.SingleOrDefault(elem => elem.Id == CurrentUserContainer.GetUserProfile().Id);
-                if (result != null)
-                {
-                    result.PhoneNumber = Phone;
-                    result.TypedAddress = address;
-                    db.SaveChanges();
-                    CurrentUserContainer.GetUserProfile().TypedAddress = address;
-                    CurrentUserContainer.GetUserProfile().PhoneNumber = Phone;
-
-                }
-            }
-            
-            NavigationManager.NavigateTo("profile");*/
+            address.StreetNumber = StreetNumber == null ? profile.TypedAddress.StreetNumber : (int)StreetNumber;
+            address.StreetName = StreetName == null ? profile.TypedAddress.StreetName : StreetName;
+            address.City = City == null ? profile.TypedAddress.City : City;
+            Phone ??= profile.PhoneNumber;
+            contactData.phone = Phone;
+            contactData.address = address;
+            contactData.name = profile.Name;
+            contactData.id = CurrentUserContainer.UserId;
+            await data.ChangeContactData(contactData.address, contactData.name, contactData.phone, contactData.id);
+            NavigationManager.NavigateTo("profile");
         }
+            
     }
+    
 
     public void Dispose()
     {

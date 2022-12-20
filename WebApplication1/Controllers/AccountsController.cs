@@ -46,5 +46,10 @@ namespace WebApplication1.Controllers
             var items = _context.Accounts.ToList();
             return items;
         }
+        [HttpGet("~/TestConnection")]
+        public void TestConnection()
+        {
+            
+        }
     }
 }

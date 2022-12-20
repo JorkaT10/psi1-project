@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace PSI_MobileApp.DataServices
 {
@@ -24,7 +25,7 @@ namespace PSI_MobileApp.DataServices
         Task<ObservableCollection<Distributor>> GetAllDistributors();
         Task<Distributor> GetDistributorsById(Guid id);
         Distributor GetDistributorsByIdConcurrent(Guid id);
-        Task AddDistributor(Guid id);
+        Task AddDistributor(Distributor distributor);
         Task AddNewProfile(Profile profile);
         Task AddNewAccount(Account account);
         Task AddAd(Advertisement advertisement, Guid id);
@@ -35,5 +36,7 @@ namespace PSI_MobileApp.DataServices
         Task UpdateProfile();
         Task ChangeSubscriptionStatus(Guid distributorId, Guid subscriberId);
         ObservableCollection<Account> GetAllAccountsConcurrent();
+        Task<bool> TestConnection();
+        Task ChangeContactData(Address address, string name, string phone, Guid id);
     }
 }

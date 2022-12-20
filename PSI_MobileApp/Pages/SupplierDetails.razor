@@ -148,16 +148,14 @@ else
         {
             while (true)
             {
-                using (ProjectDatabaseContext dbContext = new()) // CHANGE
-                {
-                    connected = await dbContext.TestConnection();
-                    if (connected)
+
+                connected = await data.TestConnection();
+                if (connected)
                         await GetDBData();
                     else
                         errorOccured = "A network error occured. Please try again.";
                     await InvokeAsync(StateHasChanged);
-                    await Task.Delay(10000);
-                }  
+                    await Task.Delay(30000);                 
             }
         });
     }
