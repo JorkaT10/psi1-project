@@ -168,8 +168,9 @@ else
         //context.SaveChanges();
         Profile = await data.GetProfileById(CurrentUserContainer.UserId);
         await mudTable.ReloadServerData();
+        
     }
-
+    
     public void Dispose()
     {
         StateContainer.OnChange -= StateHasChanged;
@@ -191,7 +192,6 @@ else
         {
             while (true)
             {
-
                 connected = await data.TestConnection();
                 if (connected)
                     await GetDBData();

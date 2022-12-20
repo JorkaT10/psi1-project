@@ -12,6 +12,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using PSI_MobileApp.DataServices;
+using Moq;
+using System.Collections.ObjectModel;
+using ProfileClasses;
+using Microsoft.Identity.Client;
 
 namespace PSI_MobileAppTests
 {
@@ -20,11 +24,13 @@ namespace PSI_MobileAppTests
 		[Fact]
 		public async void UsernameValidationTest()
 		{
-			using var Context = new TestContext();
+            var mockAPI = new Mock<IGetData>();
+			mockAPI.Setup(a => a.GetAllAccountsConcurrent()).Returns(GetAccountsConcurently());
+            using var Context = new TestContext();
 			var configuration = new MudServicesConfiguration();
 			Context.Services.AddDbContextFactory<ProjectDatabaseContext>();
 			Context.Services.AddScoped<StateContainer>();
-            Context.Services.AddSingleton<IGetData, GetData>();
+            Context.Services.AddSingleton(mockAPI.Object);
             var comp = Context.RenderComponent<AccountCreation>();
 			var form = comp.FindComponent<MudForm>().Instance;
 			Assert.NotNull(form);
@@ -35,7 +41,17 @@ namespace PSI_MobileAppTests
 			Assert.True(textField.Error);
 			textFieldcomp[0].Find("input").Change("DefinitelyNotInDB");
 			Assert.False(textField.Error);
+
 		}
+
+		private ObservableCollection<Account> GetAccountsConcurently()
+		{
+			return new ObservableCollection<Account>
+			{
+				new Account{UserName="a", Password="pw", Id=Guid.NewGuid()}
+			};
+		}
+
 		[Fact]
 		public async void PasswordValidationTest()
 		{
@@ -83,6 +99,47 @@ namespace PSI_MobileAppTests
 			textFieldcomp[3].Find("input").Change("a@a.a");
 			Assert.False(textField.Error);
 		}
-	}
+
+
+
+        [Fact]
+        public void ChooseCuisineCheckTest()
+        {
+            using var Context = new TestContext();
+            Context.JSInterop.Mode = JSRuntimeMode.Loose;
+            var configuration = new MudServicesConfiguration();
+            Context.Services.AddDbContextFactory<ProjectDatabaseContext>();
+            Context.Services.AddScoped<StateContainer>();
+            Context.Services.AddSingleton<IGetData, GetData>();
+			Context.Services.AddMudBlazorDialog()
+				.AddMudBlazorSnackbar(configuration.SnackbarConfiguration)
+				.AddMudBlazorResizeListener(configuration.ResizeOptions)
+				.AddMudBlazorResizeObserver(configuration.ResizeObserverOptions)
+				.AddMudBlazorResizeObserverFactory()
+				.AddMudBlazorKeyInterceptor()
+				.AddMudBlazorJsEvent()
+				.AddMudBlazorScrollManager()
+				.AddMudBlazorScrollListener()
+				.AddMudBlazorJsApi()
+				.AddMudBlazorScrollSpy()
+				.AddMudPopoverService(configuration.PopoverOptions)
+				.AddMudEventManager();
+			var comp = Context.RenderComponent<ChooseCuisine>();
+			var stateContainer = Context.Services.GetRequiredService<StateContainer>();
+			stateContainer.TempProfile = new();
+			Thread.Sleep(1000);
+			comp.Instance.cuisines = new HashSet<string>() { };
+			comp.Instance.Check();
+			Assert.Contains(Cuisines.None, stateContainer.TempProfile.CuisineArray);
+
+			HashSet<string> list = new HashSet<string>();
+			list.Add("European");
+            list.Add("Asian"); // possible expancsions later
+            comp.Instance.cuisines = list;
+			comp.Instance.Check();
+            Assert.Contains(Cuisines.European, stateContainer.TempProfile.CuisineArray);
+            Assert.Contains(Cuisines.Asian, stateContainer.TempProfile.CuisineArray);
+        }
+    }
 }
 

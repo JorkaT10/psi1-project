@@ -40,7 +40,7 @@
         <MudText><b>Email:</b> @profile.Email </MudText>
         <MudText><b>Phone number:</b> @profile.PhoneNumber </MudText>
         <MudText><b>Address:</b> @profile.TypedAddress.City, @profile.TypedAddress.StreetName st. @profile.TypedAddress.StreetNumber</MudText>
-        <MudText><b>Cuisines:</b> 
+        <MudText><b>Cuisines: </b> 
             @foreach (var cuisine in profile.CuisineArray)
             {
                 var last = profile.CuisineArray.LastOrDefault();
