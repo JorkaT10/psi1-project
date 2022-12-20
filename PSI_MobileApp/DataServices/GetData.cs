@@ -363,7 +363,7 @@ namespace PSI_MobileApp.DataServices
                 var apiResponse = await client.GetAsync(url);
                 if (!apiResponse.IsSuccessStatusCode)
                 {
-                    throw new HttpRequestException();
+                    return Guid.Empty;
                 }
                 var response = await apiResponse.Content.ReadAsStringAsync();
                 return JsonConvert.DeserializeObject<Guid>(response);
