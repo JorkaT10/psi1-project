@@ -16,7 +16,6 @@ using Moq;
 using System.Collections.ObjectModel;
 using ProfileClasses;
 using Microsoft.Identity.Client;
-
 namespace PSI_MobileAppTests
 {
 	public class AccountCreationTests
