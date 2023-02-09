@@ -17,14 +17,14 @@ Padaryta:
 - [x] Tiekėjai pateikia "skelbimus"
 
 Implementuoti:
-- [ ] Arčiausių vietų paieška
-- [ ] Reitingai + įvertinimų skaičius
-- [ ] Apmokėjimas
-- [ ] Maisto krepšelis
-- [ ] Reportinimo sistema nelegaliems produktams/patiekalams 
-- [ ] Komentarai tiekėjams
-- [ ] Nuotraukos
-- [ ] Patobulinti žėmėlapį, kad būtų visiškai funkcionalus
-- [ ] Tiekėjų produktų šablonas, iš kurio galima greitai pridėti patiekalą
-- [ ] Nustatymai/preferences
+- [ ] Integruoti į žemėlapį galimybę ieškoti pagal vietą. 
+- [ ] Būtų gerai, kad vartotojai galėtų įvertinti maisto tiekėjus ir palikti komentarus jeigu jie tai norėtų.
+- [ ] Apmokėjimas turėtų būti pačioje programoje per skirtingas bankų platformas.
+- [ ] Vartotojai turėtų galėti pridėti kelis petiekalus į pirkinių krepšelį.
+- [ ] Reportinimo sistema nelegaliems produktams, patiekalams ir tiekėjams. 
+- [ ] Programą turėtų būti galima naudoti keliose skirtingose platformose. (Kol kas eina tik ant Windows)
+- [ ] Tiekėjai turėtų galėti uždėti savo tiekiamiems produktams nuotraukas, kad galėtų pritraukti vartotojų dėmesį.
+- [ ] Žemėlapis turėtų sekti vartotojo vietą ir pateikti labiausiai efektyvų kelią iki artimiausių ar pasirinktų tiekėjų.
+- [ ] Tiekėjai turėtų turėti produktų šablonas, iš kurio galima greitai pridėti sukurtą patiekalą.
+- [ ] Vartotojai turėtų galėti tvarkyti savo nustatymus ir paskyrą programoje. 
 
