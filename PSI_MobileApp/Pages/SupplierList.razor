@@ -1,25 +1,23 @@
 ﻿@page "/supplierlist"
-@using AccountDataSerializer
 @using ClassLibrary
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.EntityFrameworkCore.Storage
 @using Npgsql
 @using MudBlazor
 @using MudBlazorFix
-@using PSI_MobileApp.DataServices;
+@using PSI_MobileApp.DataServices
 @using PSI_MobileApp.Extensions
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @using System.Net.NetworkInformation
 @using System.Diagnostics
+@using PSI_MobileApp.Containers
 @inject StateContainer StateContainer
 @inject IdStateContainer IdContainer
 @inject CurrentUserContainer CurrentUserContainer
 @inject NavigationManager NavigationManager
 @inject IGetData data
 @implements IDisposable
-
-
 
 <h3>Supplier List</h3>
 

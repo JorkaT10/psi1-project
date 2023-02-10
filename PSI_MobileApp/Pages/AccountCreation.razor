@@ -1,5 +1,5 @@
-﻿@page "/usercreateaccount"
-@using AccountDataSerializer
+﻿<!-- Page used to allow the user to input data relating to the account (username, password, email) -->
+@page "/usercreateaccount"
 @using Microsoft.EntityFrameworkCore;
 @using Newtonsoft.Json
 @using PSI_MobileApp.DataServices;
@@ -7,13 +7,14 @@
 @using System.Collections.ObjectModel
 @using System.Text.Json
 @using ClassLibrary
+@using PSI_MobileApp.Containers
 @using System.ComponentModel.DataAnnotations
 @implements IDisposable
 @inject StateContainer StateContainer
 @inject IGetData data
 @inject NavigationManager NavigationManager
 <h3>Create new account</h3>
-<!--<MudText> Test </MudText>-->
+<!--The form itself created using MudForm for detailed documentation please refer to https://mudblazor.com/components/form-->
 <MudForm @bind-isValid = "@isValid">
     <MudTextField T="string" Label="Username" @bind-Value="Username" Required="true" RequiredError="Field Username is required." Validation="@(new Func<string, string>(IsUniqueUsername))" />  
     <MudTextField T="string" Label="Password" @bind-Value="Password" Required="true" RequiredError="Field Password is required." Validation="@(new Func<string, string>(ContainsWhitespace))" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
@@ -23,9 +24,12 @@
 </MudForm>
 
 @code {
-    public bool isValid;
-    bool isShow;
+    public bool isValid; // binding value which stores the validity of form.
+
+    // bools that store whether to show inputed password/confirmation or to keep it hidden
+    bool isShow; 
     bool isShowConfirm;
+    //
     public InputType PasswordInput = InputType.Password;
     string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
     public InputType PasswordInputConfirm = InputType.Password;
@@ -34,7 +38,7 @@
     public string Password;
     public string Email;
     public string Confirm;
-    void ButtonTestclick()
+    void ButtonTestclick() // configure isShow value
     {
         @if (isShow)
         {
@@ -49,7 +53,7 @@
             PasswordInput = InputType.Text;
         }
     }
-    void ButtonTestclickConfirm()
+    void ButtonTestclickConfirm() // configure isShowConfirm value
     {
         @if (isShowConfirm)
         {
@@ -64,7 +68,7 @@
             PasswordInputConfirm = InputType.Text;
         }
     }
-    public void HandleSubmit()
+    public void HandleSubmit() // handles valid submits by creating the temporary account and profile and storing them in the state container.
     {
         Profile profile = new();
         Account account = new();
@@ -85,7 +89,7 @@
             NavigationManager.NavigateTo("inputcontactdata");
         }
     }
-    public string IsIdentical(string confirm)
+    public string IsIdentical(string confirm) // checks if confirm passwword and password are the same
     {
 
         if (String.Equals(confirm, Password))

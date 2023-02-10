@@ -1,5 +1,6 @@
-﻿@page "/inputcontactdata"
-@using AccountDataSerializer
+﻿<!-- Page which allows the user to input contact data the function of the page depends on whether there is a currently logged in user-->
+@page "/inputcontactdata"
+@using PSI_MobileApp.Containers;
 @using Microsoft.EntityFrameworkCore;
 @using Newtonsoft.Json
 @using PSI_MobileApp.DataServices;
@@ -14,8 +15,9 @@
 @implements IDisposable
 @inject IGetData data
 <h3>Input Contact Data</h3>
-@if ((CurrentUserContainer.UserId != Guid.Empty))
+@if ((CurrentUserContainer.UserId != Guid.Empty)) // if there is a logged in user the page is in edit mode which has different constraints comparing to input mode. If a field is left empty in edit mode that means that the value should stay the same
 {
+    <!--The form itself created using MudForm for detailed documentation please refer to https://mudblazor.com/components/form-->
     <MudForm @bind-isValid="@isValid">
         @if (StateContainer.CreatingDistributor)
         {
@@ -28,7 +30,7 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!isValid)" Class="ml-auto" @onclick="HandleValidSubmit">Register</MudButton>
     </MudForm>
 }
-else
+else // if there no current user then the page is in input mode where all fields are required
 {
     <MudForm @bind-isValid="@isValid">
         @if (StateContainer.CreatingDistributor)
@@ -53,7 +55,7 @@ else
     public string DistributorName = string.Empty;
     public async Task HandleValidSubmit()
     {
-        if ((CurrentUserContainer.UserId == Guid.Empty))
+        if ((CurrentUserContainer.UserId == Guid.Empty)) // if there is no current user it simply assigns the field values to the variables
         {
             Address address = new();
             if (StateContainer.CreatingDistributor)
@@ -67,7 +69,7 @@ else
             StateContainer.TempProfile.TypedAddress = address;
             NavigationManager.NavigateTo("choosecuisines");
         }
-        else
+        else // if there is a current user it checks if the fields are empty in which case the values stay the same
         {
             Profile profile = await data.GetProfileById(CurrentUserContainer.UserId);
             ContactData contactData = new();

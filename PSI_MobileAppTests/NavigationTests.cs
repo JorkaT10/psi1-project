@@ -6,13 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PSI_MobileApp;
 using PSI_MobileApp.DataServices;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using PSI_MobileApp.Pages;
 using Bunit.TestDoubles;
 using Microsoft.AspNetCore.Components;
+using PSI_MobileApp.Containers;
 
 namespace PSI_MobileAppTests
 {

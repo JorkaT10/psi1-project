@@ -6,7 +6,7 @@ namespace ClassLibrary
 {
     public class ProjectDatabaseContext : DbContext
     {
-        private readonly string _connectionString = "Server=host.docker.internal;Port=49153;Database=pg;Uid=postgres;Pwd=postgrespw;";
+        private readonly string _connectionString = "Server=localhost;Port=5432;Database=postgres;Uid=postgres;Pwd=postgrepw;";
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(_connectionString);

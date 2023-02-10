@@ -1,4 +1,4 @@
-﻿namespace PSI_MobileApp
+﻿namespace PSI_MobileApp.Containers
 {
     public class IdStateContainer
     {

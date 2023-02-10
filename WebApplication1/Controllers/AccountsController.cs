@@ -24,7 +24,7 @@ namespace WebApplication1.Controllers
         [HttpGet("~/GetAccountById")]
         public async Task<Account> GetAccountById(Guid id)
         {
-            var items = await _context.Accounts.Where(elem => elem.Id == id).FirstOrDefaultAsync();
+            var items = await _context.Accounts.Where(elem => elem.Id == id).FirstAsync();
             return items;
         }
         [HttpPut("~/AddNewAccount")]

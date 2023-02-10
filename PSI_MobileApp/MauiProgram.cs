@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
-using PSI_MobileApp.Data;
+using PSI_MobileApp.Containers;
 using PSI_MobileApp.DataServices;
 using PSI_MobileApp.Pages;
 
@@ -27,7 +27,6 @@ public static class MauiProgram
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
 #endif
-		builder.Services.AddSingleton<WeatherForecastService>();
 		builder.Services.AddScoped<StateContainer>();
         builder.Services.AddScoped<IdStateContainer>();
 		builder.Services.AddScoped<CurrentUserContainer>();

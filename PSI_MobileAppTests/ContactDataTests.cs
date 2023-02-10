@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using MudBlazor.Services;
 using PSI_MobileApp.Pages;
 using ClassLibrary;
-using PSI_MobileApp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -17,10 +16,11 @@ using System.Collections.ObjectModel;
 using ProfileClasses;
 using Microsoft.Identity.Client;
 using static MudBlazor.CategoryTypes;
+using PSI_MobileApp.Containers;
 
 namespace PSI_MobileAppTests
 {
-	public class ContactDataTests
+    public class ContactDataTests
 	{
 		[Fact]
 		public async void ContactDetails_HandleValidSubmit_ChangesValuesCorrectly()

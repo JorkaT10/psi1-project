@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using MudBlazor.Services;
 using PSI_MobileApp.Pages;
 using ClassLibrary;
-using PSI_MobileApp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -16,9 +15,11 @@ using Moq;
 using System.Collections.ObjectModel;
 using ProfileClasses;
 using Microsoft.Identity.Client;
+using PSI_MobileApp.Containers;
+
 namespace PSI_MobileAppTests
 {
-	public class AccountCreationTests
+    public class AccountCreationTests
 	{
 		[Fact]
 		public async void UsernameValidationTest()

@@ -6,6 +6,7 @@
 @using PSI_MobileApp.Extensions
 @using MudBlazor
 @using MudBlazorFix
+@using PSI_MobileApp.Containers;
 @inject IdStateContainer IdContainer
 @inject CurrentUserContainer ProfileContainer
 @inject IDialogService DialogService
@@ -226,7 +227,7 @@ else
     {
         var allAdvertisements = await data.GetAllAdvertisements();
         if (SelectedAdvertisement != null)
-            await data.RemoveAdvertisement(SelectedAdvertisement);
+            await data.RemoveAdvertisement(SelectedAdvertisement.Id);
         await mudTable.ReloadServerData();
     }
 
@@ -237,8 +238,8 @@ else
             var buyer = SelectedAdvertisement.Buyer;
             if (buyer == null)
             {
-                var currentProfile = ProfileContainer.GetUserProfile(); //dbContext.Profiles.Where(p => p.Id == ProfileContainer.UserId);
-                await data.ChangeOrderStatus(SelectedAdvertisement.Id, currentProfile.Id);//advert.FirstOrDefault().Buyer = currentProfile;
+                var currentProfile = ProfileContainer.UserId; //dbContext.Profiles.Where(p => p.Id == ProfileContainer.UserId);
+                await data.ChangeOrderStatus(SelectedAdvertisement.Id, currentProfile);//advert.FirstOrDefault().Buyer = currentProfile;
                 selectedRowNumber = -1;
                 mudTable.SetSelectedItem(null);
                 await mudTable.ReloadServerData();

@@ -11,7 +11,7 @@ namespace WebApplication1.Controllers
     public class ProfilesController : Controller
     {
         private readonly ProjectDatabaseContext _context;
-
+        #pragma warning disable CS8603, CS8604, CS8602 // Possible null reference return.
         public ProfilesController(ProjectDatabaseContext context)
         {
             _context = context;
@@ -26,7 +26,9 @@ namespace WebApplication1.Controllers
         public async Task<Profile> GetProfileById(Guid id)
         {
             var items = await _context.Profiles.Include(a => a.Subscriptions).Where(elem => elem.Id == id).FirstOrDefaultAsync();
+
             return items;
+
         }
         [HttpGet("~/GetDistributorProfiles")]
         public async Task<List<Profile>> GetDistributorProfiles()
@@ -75,5 +77,6 @@ namespace WebApplication1.Controllers
             profile.PhoneNumber = phone;
             await _context.SaveChangesAsync();
         }
+        #pragma warning restore CS8603, CS8604, CS8602 // Possible null reference return.
     }
 }

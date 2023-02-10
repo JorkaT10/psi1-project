@@ -61,17 +61,26 @@ namespace WebApplication1.Controllers
             _context.SaveChanges();
         }
         [HttpPut("~/RemoveAdvertisement")]
-        public async Task RemoveAdvertisement(Advertisement advertisement)
+        public async Task RemoveAdvertisement(Guid advertisementId)
         {
-            _context.Remove(advertisement);
+            var advertisement = await _context.Advertisements.Where(ad => ad.Id == advertisementId).FirstAsync();
+            _context.Advertisements.Remove(advertisement);
             await _context.SaveChangesAsync();
         }
         [HttpPut("~/ChangeOrderStatus")]
         public async Task ChangeOrderStatus([FromQuery] Guid advertisementId, [FromQuery] Guid id)
         {
-            var profile = _context.Profiles.Where(a => a.Id == id).FirstOrDefault();
-            var advertisement = _context.Advertisements.Where(a => a.Id == advertisementId).First();
-            advertisement.Buyer = profile;
+            if (id == Guid.Empty)
+            {
+                var advertisement = await _context.Advertisements.Include(a => a.Buyer).Where(a => a.Id == advertisementId).FirstAsync();
+                advertisement.Buyer = null;
+            }
+            else
+            {
+                var profile = await _context.Profiles.Where(a => a.Id == id).FirstOrDefaultAsync();
+                var advertisement = await _context.Advertisements.Where(a => a.Id == advertisementId).FirstAsync();
+                advertisement.Buyer = profile;
+            }
             await _context.SaveChangesAsync();
         }
     }

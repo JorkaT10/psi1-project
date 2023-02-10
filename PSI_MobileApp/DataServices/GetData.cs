@@ -16,6 +16,9 @@ namespace PSI_MobileApp.DataServices
 {
     public class GetData : IGetData
     {
+        /// <summary>
+        /// The method names are pretty self-explanatory, however if any question arise do not be afraid to contact Matas.
+        /// </summary>
         private String _baseUrl = "https://localhost:7034";
         public async Task<ObservableCollection<Profile>> GetAllProfiles()
         {
@@ -331,12 +334,12 @@ namespace PSI_MobileApp.DataServices
                 }
             }
         }
-        public async Task RemoveAdvertisement(Advertisement advertisement)
+        public async Task RemoveAdvertisement(Guid id)
         {
             using (var client = new HttpClient())
             {
-                string url = $"{_baseUrl}/RemoveAdvertisement";
-                var apiResponse = await client.PutAsJsonAsync(url, advertisement);
+                string url = $"{_baseUrl}/RemoveAdvertisement?advertisementId={id}";
+                var apiResponse = await client.PutAsJsonAsync(url, (HttpContent)null);
                 if (!apiResponse.IsSuccessStatusCode)
                 {
                     throw new HttpRequestException();

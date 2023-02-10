@@ -9,16 +9,16 @@ using System.Text;
 using System.Threading.Tasks;
 using PSI_MobileApp.DataServices;
 using Microsoft.Identity.Client;
-
-namespace PSI_MobileApp
+// WARNING: this class contains a lot of unexpected behaviour with the lazy initialization. Therefore if your team wants to feel free to remove change it to eager.
+namespace PSI_MobileApp.Containers
 {
     public class CurrentUserContainer
     {
-        private Guid _userId { get; set; }
-        private Lazy<Account> _userAccount { get; set; }
-        private Lazy<Profile> _userProfile { get; set; }
+        private Guid _userId { get; set; } // stores the id of the current logged in user.
+        private Lazy<Account> _userAccount { get; set; } // stores the account data (if initialized) of the current logged in user.
+        private Lazy<Profile> _userProfile { get; set; } // stores the profile data (if initialized) of the current logged in user.
         private GetData getData = new();
-        private Lazy<Distributor> _userDistributor { get; set; }
+        private Lazy<Distributor> _userDistributor { get; set; } // stores the distributor (if a distributor) data (if initialized) of the current logged in user.
         public Guid UserId
         {
             get { return _userId; }
@@ -60,11 +60,11 @@ namespace PSI_MobileApp
         {
             UserId = Guid.Empty;
             _userDistributor = new Lazy<Distributor>(delegate () { return GetDistributorFromWeb(); });
-            _userAccount = new Lazy<Account>(delegate ()  { return GetAccountFromWeb(); }) ;
+            _userAccount = new Lazy<Account>(delegate () { return GetAccountFromWeb(); });
             _userProfile = new Lazy<Profile>(delegate () { return GetProfileFromWeb(); });
 
         }
-        public event Action? OnChange;
+        public event Action OnChange;
 
         private void NotifyStateChanged() => OnChange?.Invoke();
     }

@@ -1,11 +1,12 @@
-﻿@page "/finishcreation"
-@using AccountDataSerializer
+﻿<!-- The end of profile creation and sends the profile to the database through the web service-->
+@page "/finishcreation"
 @using Microsoft.EntityFrameworkCore;
 @using Newtonsoft.Json
 @using PSI_MobileApp.DataServices;
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @using ClassLibrary
+@using PSI_MobileApp.Containers
 @inject IGetData data
 @inject StateContainer StateContainer
 @inject NavigationManager NavigationManager

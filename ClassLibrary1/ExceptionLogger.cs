@@ -8,7 +8,7 @@ namespace PSI_MobileApp
 {
     public class ExceptionLogger : IDisposable
     {
-        private string path = "C:\\Users\\Rokas\\source\\repos\\merges-psi-project\\PSI_MobileApp\\Log.txt";
+        private string path = "C:\\Users\\matas\\Documents\\test\\log.txt";
         private FileStream fileStream;
         public ExceptionLogger()
         {

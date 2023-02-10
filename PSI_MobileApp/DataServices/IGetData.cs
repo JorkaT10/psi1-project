@@ -10,7 +10,7 @@ using System.Web.Http;
 
 namespace PSI_MobileApp.DataServices
 {
-    public interface IGetData
+    public interface IGetData // interface which contains methods relating to communication with the database. Interface is used in order to use dependency injection
     {
         Task<ObservableCollection<Profile>> GetAllProfiles();
         Task<ObservableCollection<Profile>> GetDistributorProfiles();
@@ -30,7 +30,7 @@ namespace PSI_MobileApp.DataServices
         Task AddNewAccount(Account account);
         Task AddAd(Advertisement advertisement, Guid id);
         Task RemoveOutdated(DateTime now);
-        Task RemoveAdvertisement(Advertisement advertisement);
+        Task RemoveAdvertisement(Guid Id);
         Task ChangeOrderStatus(Guid advertisementId, Guid id);
         Task<Guid> GetAccount(string username, string password);
         Task UpdateProfile();
