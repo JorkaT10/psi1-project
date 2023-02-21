@@ -32,8 +32,10 @@ namespace WebApplication1.Controllers
             return items;
         }
         [HttpPut("~/AddDistributors")]
-        public async Task AddDistributors(Distributor distributor)
+        public async Task AddDistributors([FromBody] Guid id)
         {
+            Distributor distributor = new();
+            distributor.Id = id;
             await _context.Distributors.AddAsync(distributor);
             await _context.SaveChangesAsync();
 

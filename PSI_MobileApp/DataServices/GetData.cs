@@ -273,12 +273,12 @@ namespace PSI_MobileApp.DataServices
             }
             return returnResponse;
         }
-        public async Task AddDistributor(Distributor distributor)
+        public async Task AddDistributor(Guid id)
         {
             using (var client = new HttpClient())
             {
                 string url = $"{_baseUrl}/AddDistributors";
-                var apiResponse = await client.PutAsJsonAsync(url, distributor);
+                var apiResponse = await client.PutAsJsonAsync(url, id);
                 if (!apiResponse.IsSuccessStatusCode)
                 {
                     throw new HttpRequestException();
