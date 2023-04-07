@@ -13,6 +13,7 @@ namespace ClassLibrary
         public DbSet<Profile> Profiles { get; set; }
         public DbSet<Distributor> Distributors { get; set; }
         public DbSet<Advertisement> Advertisements { get; set; }
+        public DbSet<Ratings> Ratings { get; set; }
 
     }
 }
