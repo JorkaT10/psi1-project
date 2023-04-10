@@ -141,6 +141,22 @@ namespace ClassLibrary.Migrations
                     b.ToTable("Profiles");
                 });
 
+            modelBuilder.Entity("ProfileClasses.Ratings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DistributorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("rating")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id", "DistributorId");
+
+                    b.ToTable("Ratings");
+                });
+
             modelBuilder.Entity("ClassLibrary.Advertisement", b =>
                 {
                     b.HasOne("ProfileClasses.Profile", "Buyer")
