@@ -446,5 +446,4 @@ namespace PSI_MobileApp.DataServices
                 }
             }
         }
-    }
 }

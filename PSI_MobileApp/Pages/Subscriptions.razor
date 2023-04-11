@@ -66,18 +66,30 @@ else
 		//context.SaveChanges();
 	}
 
+	public async Task ChangeRating(Ratings rating)
+	{
+		await data.ChangeRating(rating);
+		//context.SaveChanges();
+	}
+	public void ChangeCurrentRating(int rating)
+	{
+		CurrentRating = rating;
+	}
+
 	protected override async Task OnInitializedAsync()
 	{
 		Debug.WriteLine("SubsInitialized");
 		StateContainer.OnChange += StateHasChanged;
 		Profile = null;
 		if(CurrentUserContainer.UserId != Guid.Empty)
-		{
+    {
 			Profile = await data.GetProfileById(CurrentUserContainer.UserId);
 		}
 		DistributorProfiles = await data.GetDistributorProfiles();
-
+    
 		await base.OnInitializedAsync();
+  }
+  
 	}
 	public void Dispose()
 	{

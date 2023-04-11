@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using ClassLibrary;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace ProfileClasses
 {
@@ -56,6 +57,27 @@ namespace ProfileClasses
         public int RatingAmount { get { return _ratingAmount; } set { _ratingAmount = value; } }
         public Guid Id { get { return _id; } set { _id = value; } }
         public virtual ObservableCollection<Advertisement>? Advertisements { get { return _advertisements; } set { _advertisements = value; } }
+    }
+
+	[PrimaryKey(nameof(Id), nameof(DistributorId))]
+	public class Ratings : IUsingUUID
+    {
+        public Guid Id { get; set; }
+        public Guid DistributorId { get; set; }
+        public int rating { get; set; }
+
+        /* public Ratings()
+        {
+            this.rating = 0;
+            this.Id= Guid.NewGuid();
+            this.DistributorId = Guid.NewGuid();
+        }*/
+        public Ratings(Guid Id, Guid DistributorId, int rating) 
+        { 
+            this.Id = Id;
+            this.DistributorId = DistributorId;
+            this.rating = rating;
+        }
     }
 
 }
