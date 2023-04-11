@@ -126,7 +126,7 @@ namespace PSI_MobileAppTests
                 {
                     Id = Guid.Parse("199d3103-f222-44de-b48f-05b412971a1e"),
                     Rating = 5,
-                    //RatingAmount = 100
+                    RatingAmount = 100
                 }
             };
         }
@@ -138,7 +138,7 @@ namespace PSI_MobileAppTests
                 {
                     Id = Guid.Parse("199d3103-f222-44de-b48f-05b412971a1e"),
                     Rating = 5,
-                    //RatingAmount = 100
+                    RatingAmount = 100
                 };
         }
     }

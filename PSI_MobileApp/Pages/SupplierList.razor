@@ -1,100 +1,118 @@
 ﻿@page "/supplierlist"
-@using AccountDataSerializer
 @using ClassLibrary
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.Storage
+@using Npgsql
+@using MudBlazor
+@using MudBlazorFix
+@using PSI_MobileApp.DataServices
 @using PSI_MobileApp.Extensions
 @using ProfileClasses
 @using System.Collections.ObjectModel
+@using System.Net.NetworkInformation
+@using System.Diagnostics
+@using PSI_MobileApp.Containers
 @inject StateContainer StateContainer
 @inject IdStateContainer IdContainer
+@inject CurrentUserContainer CurrentUserContainer
 @inject NavigationManager NavigationManager
-@inject ExceptionLogger Logger
-@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
+@inject IGetData data
 @implements IDisposable
-
 
 <h3>Supplier List</h3>
 
-@if (Profiles == null)
-{ 
-    
-    <div>
-    <input class="form-control" type="text" placeholder="Search"
-            @bind="Search"
-            @oninput="(e) =>  SearchCommand(e.Value.ToString())" />
-    </div>
+@if (!connected || (Profiles == null) || (Distributors == null))
+{
+    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" Immediate="true"></MudTextField>
 
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Name</th>
-				<th>Rating</th>
-                <th>Phone number</th>
-                <th>Cuisines</th>
-			</tr>
-		</thead>
-    </table>
+    <MudTable Hover="true" Breakpoint="Breakpoint.Sm" OnRowClick="@GoToDetailOnClick" LoadingProgressColor="Color.Info" T="Profile">
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+            <MudTh>Rating</MudTh>
+            <MudTh>Phone number</MudTh>
+            <MudTh>Cuisines</MudTh>
+            <MudTh>Subscribe</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+         
+        </RowTemplate>
+
+
+    </MudTable>
 
     <MudOverlay Visible="true" DarkBackground="true" Absolute="true" >
         <MudStack AlignItems="AlignItems.Center">
             <MudProgressCircular Color="Color.Default" Indeterminate="true"/>
-            <MudText>An error has occured while loading data.</MudText>
-            <MudText>@canNotConnectText</MudText>
-            <MudButton Variant="Variant.Outlined" OnClick="Refresh">Refresh</MudButton>
-       </MudStack>
+            <MudText>Loading...</MudText>
+            <MudText>@errorOccured</MudText>
+            <MudText>@tryingToConnect</MudText>
+            <MudButton Variant="Variant.Outlined" OnClick="Return">Return to Homepage</MudButton>
+        </MudStack>
         
     </MudOverlay>
     
 }
 else
 {
-    <div>
-        <input class="form-control" type="text" placeholder="Search"
-               @bind="Search"
-               @oninput="(e) =>  SearchCommand(e.Value.ToString())" />
-    </div>
+    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" Immediate="true"></MudTextField>
 
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Name</th>
-				<th>Rating</th>
-                <th>Phone number</th>
-                <th>Cuisines</th>
-			</tr>
-		</thead>
-		<tbody>
-			@foreach (var supplier in SearchResults)
-			{
-                
-                <tr @onclick="()=>GoToDetailOnClick(supplier)">
-                    <td>@supplier.Name</td>
-                    @try
+    <MudTable @ref="mudTable" ServerData="@(new Func<TableState, Task<TableData<Profile>>>(ServerReload))" Hover="true" Breakpoint="Breakpoint.Sm" OnRowClick="@GoToDetailOnClick"  LoadingProgressColor="Color.Info" T="Profile">
+		<HeaderContent>
+            <MudTh><MudTableSortLabel SortLabel="name" T="Profile">Name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortLabel="rating" T="Profile">Rating</MudTableSortLabel></MudTh>
+                <MudTh>Phone number</MudTh>
+                <MudTh>Cuisines</MudTh>
+                <MudTh>Subscribe</MudTh>
+		</HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Name</MudTd>
+            <MudTd><MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(Distributors.Where(d => d.Id == context.Id).FirstOrDefault().Rating)></MudRating></MudTd>
+            <MudTd>@context.PhoneNumber</MudTd>
+            <MudTd>
+                @foreach (var cuisine in context.CuisineArray)
+                {
+                    @cuisine
+                    <br/>
+                }
+            </MudTd>
+            <MudTd>
+                @if (Profile != null)
+                {
+                    @if(Profile.Subscriptions != null)
                     {
-                        <td>@(context.Distributors.Where(d => d.Id == supplier.Id).FirstOrDefault().Rating)</td>
-                    }
-					catch(Exception ex)
-                    {
-                        Logger.Log(ex);
-                    }
-					<td>@supplier.PhoneNumber</td>
-                    <td>
-                        @foreach (var cuisine in supplier.CuisineArray)
+                        @if (Profile.Subscriptions.Any(d => d.Id == data.GetDistributorsByIdConcurrent(context.Id).Id))
                         {
-                            @cuisine<br>
+                            <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" OnClick="()=> ChangeSubscriptionStatus(context.Id)">Unsubscribe</MudButton>
                         }
-                    </td>
-				</tr>
-			}
-		</tbody>
-	</table>
+                        else
+                        {
+                            <MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" OnClick="()=> ChangeSubscriptionStatus(context.Id)">Subscribe</MudButton>
+                        }
+                    }
+                    else
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => ChangeSubscriptionStatus(context.Id)" class="btn btn-primary">Subscribe</MudButton>
+                    }
+                }
+            </MudTd>
+        </RowTemplate>
+           
+
+    </MudTable>
 }
+
 
 @code {
     // private AccountDataSerializer<Profile> _dataSerializer;
+    private MudTable<Profile> mudTable;
     private ObservableCollection<Profile> _searchResult;
-    ProjectDatabaseContext context;
     private string canNotConnectText = string.Empty;
+    private string errorOccured = string.Empty;
+    private string tryingToConnect = string.Empty;
+    private bool connected;
+    public Profile Profile { get; set; }
     public ObservableCollection<Profile> SearchResults
     {
         get
@@ -107,6 +125,11 @@ else
         }
     }
 
+    public ObservableCollection<Distributor> Distributors
+    {
+        get; private set;
+    }
+
     public ObservableCollection<Profile> Profiles
     {
         get; private set;
@@ -114,49 +137,106 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
-        try
-        {
-            var distrib = await context.Distributors.Select(d => d.Id).ToObservableCollecionAsync();
-            Profiles = await context.Profiles.Where(p => distrib.Contains(p.Id)).ToObservableCollecionAsync();
-        }
-        catch (Exception ex)
-        {
-            Logger.Log(ex);
-        }
-        SearchResults = Profiles;
+        Profile = await data.GetProfileById(CurrentUserContainer.UserId);
+        ActivateTestConnection();
         StateContainer.OnChange += StateHasChanged;
     }
 
 
-    public string Search { get; set; }
+    public string Search { get; set; } = String.Empty;
 
-    public void SearchCommand(string search)
+    public void OnSearch(string search)
     {
-        SearchResults = DataSearch.getSearchResults<Profile>(Profiles, searchQuery: search);
+        Search = search;
+        mudTable.ReloadServerData();
     }
 
 
-    public void GoToDetailOnClick(Profile profile)
+    private void GoToDetailOnClick(TableRowClickEventArgs<Profile> tableRowClickEventArgs)
     {
         IdContainer.OnChange += StateHasChanged;
-        IdContainer.Id = profile.Id;
-        NavigationManager.NavigateTo("/supplierlist/supplierdetails");
+        IdContainer.Id = tableRowClickEventArgs.Item.Id;
+        NavigationManager.NavigateTo("/supplierdetails");
     }
 
+    public async Task ChangeSubscriptionStatus(Guid distributorId)
+    {
+        await data.ChangeSubscriptionStatus(distributorId, CurrentUserContainer.UserId);
+        var distributor = await data.GetDistributorsById(distributorId);
+        //context.SaveChanges();
+        Profile = await data.GetProfileById(CurrentUserContainer.UserId);
+        await mudTable.ReloadServerData();
+        
+    }
+    
     public void Dispose()
     {
         StateContainer.OnChange -= StateHasChanged;
-        context.Dispose();
+
     }
 
-    public void Refresh()
+    public void Return()
     {
-        if (context.Database.CanConnect())
-            NavigationManager.NavigateTo("/supplierlist", true);
-        else
-        {
-            canNotConnectText = "Can not connect to database. Please check your internet connection and try again.";
-        }
+        //tryingToConnect = "Trying to reconnect..."; // don't know if should leave it like this or remove it since it returns back to homepage.
+        StateHasChanged();
+        NavigationManager.NavigateTo("/", true);
+
     }
+
+
+    async void ActivateTestConnection()
+    {
+        await Task.Run(async () =>
+        {
+            while (true)
+            {
+                connected = await data.TestConnection();
+                if (connected)
+                    await GetDBData();
+                else
+                    errorOccured = "A network error occured. Please try again.";
+                await InvokeAsync(StateHasChanged);
+                await Task.Delay(30000);
+            }
+        });
+    }
+
+    async Task GetDBData()
+    {
+
+        Profiles = await data.GetDistributorProfiles();
+        Distributors = await data.GetAllDistributors();
+
+        SearchResults = Profiles;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private IEnumerable<Profile> pagedData;
+    private int totalItems;
+    private async Task<TableData<Profile>> ServerReload(TableState state)
+    {
+        await data.RemoveOutdated(DateTime.UtcNow);
+        IEnumerable<Profile> queryFirst = await data.GetDistributorProfiles();
+        IEnumerable<Profile> query = DataSearch.getSearchResults(queryFirst, searchQuery: Search); // dbContext.Advertisements.Include(a => a.Buyer).Where(a => a.Distributor.Id == profile.Id);
+        await Task.Delay(300);
+
+        switch (state.SortLabel)
+        {
+            case "name":
+                query = query.OrderByDirection(state.SortDirection, o => o.Name);
+                break;
+            case "rating":
+                query = query.OrderByDirection(state.SortDirection, o => data.GetDistributorsByIdConcurrent(o.Id).Rating);
+                break;
+            default:
+                query = query.OrderBy(o => o.Name);
+                break;
+        }
+
+        totalItems = query.Count();
+        pagedData = query.Skip(state.Page * state.PageSize).Take(state.PageSize);
+        return new TableData<Profile>() { TotalItems = totalItems, Items = pagedData };
+
+    }
+
 }

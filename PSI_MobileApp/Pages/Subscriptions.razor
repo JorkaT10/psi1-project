@@ -1,18 +1,21 @@
 ﻿@page "/subs"
 @using ClassLibrary;
+@using PSI_MobileApp.DataServices;
 @using ProfileClasses
 @using System.Collections.ObjectModel
-@using AccountDataSerializer
 @using Microsoft.EntityFrameworkCore
+@using PSI_MobileApp.Extensions
+@using System.Diagnostics;
+@using PSI_MobileApp.Containers;
 @inject StateContainer StateContainer
+@inject IdStateContainer IdContainer
 @inject NavigationManager NavigationManager
 @inject CurrentUserContainer CurrentUserContainer
-@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
-@inject ExceptionLogger Logger
+@inject IGetData data
 @implements IDisposable
 
 <h3>Subscriptions</h3>
-@if (Profile == null || Profile.Subscriptions == null)
+@if (Profile == null || Profile?.Subscriptions == null)
 {
 	<p><em>Loading...</em></p>
 }
@@ -27,86 +30,40 @@ else
 			</tr>
 		</thead>
 		<tbody>
-			@try
-			{
 				@foreach (var supplier in Profile.Subscriptions)
 				{
-<<<<<<< Updated upstream
 					<tr>
 						<td @onclick="()=>GoToDetailOnClick(DistributorProfiles.First(i => supplier.Id == i.Id))">@DistributorProfiles.First(i => supplier.Id == i.Id).Name</td>
 						<MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(supplier.Rating)></MudRating>
 						<td>
-							@foreach (var cuisine in DistributorProfiles.Where(elem => elem.Id == supplier.Id))
+							@foreach (var cuisine in DistributorProfiles.First(i => supplier.Id == i.Id).CuisineArray)
 							{
 								@cuisine.ToString()<br>
 							}
 						</td>
-						<MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="()=>ChangeSubscriptionStatus(supplier)">Unsubscribe</MudButton>
+					<MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="async ()=> await ChangeSubscriptionStatus(supplier.Id)">Unsubscribe</MudButton>
 					</tr>
-=======
-					@foreach (var rating in Ratings)
-					{
-						@if (rating.DistributorId == supplier.Id)
-						{
-							<tr>
-								<td @onclick="()=>GoToDetailOnClick(DistributorProfiles.First(i => supplier.Id == i.Id))">@DistributorProfiles.First(i => supplier.Id == i.Id).Name</td>
-								<MudRating ReadOnly="false" Color="Color.Dark" SelectedValue=@rating.rating SelectedValueChanged="ChangeCurrentRating" 
-									@onclick="async () => await ChangeRating(new Ratings(CurrentUserContainer.UserId, supplier.Id, 2))"></MudRating>
-								<td>
-									@foreach (var cuisine in DistributorProfiles.First(i => supplier.Id == i.Id).CuisineArray)
-									{
-										@cuisine.ToString()<br>
-									}
-								</td>
-							<MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="async ()=> await ChangeSubscriptionStatus(supplier.Id)">Unsubscribe</MudButton>
-							</tr>
-						}
-					}
->>>>>>> Stashed changes
 				}
-			}
-			catch(Exception ex)
-			{
-				Logger.Log(ex);
-			}
 		</tbody>
 	</table>
 }
 
 @code {
 	public Profile Profile { get; set; }
-<<<<<<< Updated upstream
-	public List<Profile> DistributorProfiles { get; set; }
-	private ProjectDatabaseContext _context;
-
-	public Subscriptions()
-=======
-	public List<Ratings> Ratings { get; set; }
-	public int CurrentRating { get; set; }
 	public ObservableCollection<Profile> DistributorProfiles { get; set; }
 	public void GoToDetailOnClick(Profile supplier)
->>>>>>> Stashed changes
 	{
-
-	}
-
-	public void GoToDetailOnClick(Profile supplier)
-	{
+		StateContainer.OnChange += StateHasChanged;
 		StateContainer.Supplier = supplier;
-		NavigationManager.NavigateTo("/supplierlist/supplierdetails");
+		IdContainer.Id = supplier.Id;
+		NavigationManager.NavigateTo("/../supplierdetails");
 	}
 
-	public void ChangeSubscriptionStatus(Distributor distributor)
+	public async Task ChangeSubscriptionStatus(Guid distributorId)
 	{
-
-		if (!Profile.Subscriptions.Contains(distributor))
-		{
-			Profile.Subscriptions.Add(distributor);
-		}
-		else
-		{
-			Profile.Subscriptions.Remove(distributor);
-		}
+		await data.ChangeSubscriptionStatus(distributorId, CurrentUserContainer.UserId);
+		var distributor = await data.GetDistributorsById(distributorId);
+		//context.SaveChanges();
 	}
 
 	public async Task ChangeRating(Ratings rating)
@@ -121,36 +78,22 @@ else
 
 	protected override async Task OnInitializedAsync()
 	{
-		try
-		{
-<<<<<<< Updated upstream
-			_context = DbFactory.CreateDbContext();
-=======
+		Debug.WriteLine("SubsInitialized");
+		StateContainer.OnChange += StateHasChanged;
+		Profile = null;
+		if(CurrentUserContainer.UserId != Guid.Empty)
+    {
 			Profile = await data.GetProfileById(CurrentUserContainer.UserId);
-			Ratings = await data.GetRatingsByUserId(CurrentUserContainer.UserId);
 		}
 		DistributorProfiles = await data.GetDistributorProfiles();
->>>>>>> Stashed changes
-
-			if (_context != null && _context.Profiles != null)
-			{
-				StateContainer.OnChange += StateHasChanged;
-
-				Profile = CurrentUserContainer.GetUserProfile();
-				DistributorProfiles = _context.Profiles.ToList();
-			}
-
-			await base.OnInitializedAsync();
-		}
-		catch(Exception ex)
-		{
-			Logger.Log(ex);
-		}
+    
+		await base.OnInitializedAsync();
+  }
+  
 	}
 	public void Dispose()
 	{
 		StateContainer.OnChange -= StateHasChanged;
-		_context?.Dispose();
 	}
 
 }

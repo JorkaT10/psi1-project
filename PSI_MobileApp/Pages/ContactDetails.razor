@@ -1,27 +1,50 @@
-﻿@page "/inputcontactdata"
-@using AccountDataSerializer
+﻿<!-- Page which allows the user to input contact data the function of the page depends on whether there is a currently logged in user-->
+@page "/inputcontactdata"
+@using PSI_MobileApp.Containers;
+@using Microsoft.EntityFrameworkCore;
 @using Newtonsoft.Json
+@using PSI_MobileApp.DataServices;
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @using System.Text.Json
 @using ClassLibrary
 @using System.ComponentModel.DataAnnotations
 @inject StateContainer StateContainer
+@inject CurrentUserContainer CurrentUserContainer
 @inject NavigationManager NavigationManager
 @implements IDisposable
+@inject IGetData data
 <h3>Input Contact Data</h3>
+@if ((CurrentUserContainer.UserId != Guid.Empty)) // if there is a logged in user the page is in edit mode which has different constraints comparing to input mode. If a field is left empty in edit mode that means that the value should stay the same
+{
+    <!--The form itself created using MudForm for detailed documentation please refer to https://mudblazor.com/components/form-->
+    <MudForm @bind-isValid="@isValid">
+        @if (StateContainer.CreatingDistributor)
+        {
+            <MudTextField T="string" Label="Establisment Name" @bind-Value="DistributorName" Required="false" RequiredError="Please enter the name of Your Establishment!" />
+        }
+        <MudTextField T="string" Label="Phone Number" @bind-Value="Phone" Required="false" Validation="@(new PhoneAttribute() {ErrorMessage = "This is not a valid Phone Number."})" />
+        <MudTextField T="string" Label="City" @bind-Value="City" Required="false" RequiredError="Field City is required." />
+        <MudTextField T="string" Label="Street Name" @bind-Value="StreetName" Required="false" RequiredError="Field Street Name is required." />
+        <MudTextField T="int?" Label="Street Number" @bind-Value="StreetNumber" Required="false" RequiredError="Field Street Number is required." Validation="@(new RangeAttribute(1, 1000000) {ErrorMessage = "A Street Number can not be negative or zero."})" />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!isValid)" Class="ml-auto" @onclick="HandleValidSubmit">Register</MudButton>
+    </MudForm>
+}
+else // if there no current user then the page is in input mode where all fields are required
+{
+    <MudForm @bind-isValid="@isValid">
+        @if (StateContainer.CreatingDistributor)
+        {
+            <MudTextField T="string" Label="Establisment Name" @bind-Value="DistributorName" Required="true" RequiredError="Please enter the name of Your Establishment!" />
+        }
+        <MudTextField T="string" Label="Phone Number" @bind-Value="Phone" Required="false" Validation="@(new PhoneAttribute() {ErrorMessage = "This is not a valid Phone Number."})" />
+        <MudTextField T="string" Label="City" @bind-Value="City" Required="true" RequiredError="Field City is required." />
+        <MudTextField T="string" Label="Street Name" @bind-Value="StreetName" Required="true" RequiredError="Field Street Name is required." />
+        <MudTextField T="int?" Label="Street Number" @bind-Value="StreetNumber" Required="true" RequiredError="Field Street Number is required." Validation="@(new RangeAttribute(1, 1000000) {ErrorMessage = "A Street Number can not be negative or zero."})" />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!isValid)" Class="ml-auto" @onclick="HandleValidSubmit">Register</MudButton>
+    </MudForm>
+}
 
-<MudForm @bind-isValid="@isValid">
-    @if(StateContainer.CreatingDistributor)
-    {
-        <MudTextField T="string" Label="Establisment Name" @bind-Value="DistributorName" Required="true" RequiredError="Please enter the name of Your Establishment!" />
-    }
-    <MudTextField T="string" Label="Phone Number" @bind-Value="Phone" Required="false" Validation="@(new PhoneAttribute() {ErrorMessage = "This is not a valid Phone Number."})"/>
-    <MudTextField T="string" Label="City" @bind-Value="City" Required="true" RequiredError="Field City is required." />
-    <MudTextField T="string" Label="Street Name" @bind-Value="StreetName" Required="true" RequiredError="Field Street Name is required." />
-    <MudTextField T="int?" Label="Street Number" @bind-Value="StreetNumber" Required="true" RequiredError="Field Street Number is required." Validation="@(new RangeAttribute(1, 1000000) {ErrorMessage = "A Street Number can not be negative or zero."})" />
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!isValid)" Class="ml-auto" @onclick="HandleValidSubmit">Register</MudButton>
-</MudForm>
 
 @code {
     public string Phone;
@@ -30,20 +53,45 @@
     public int? StreetNumber;
     public bool isValid;
     public string DistributorName = string.Empty;
-    public void HandleValidSubmit()
+    public async Task HandleValidSubmit()
     {
-        Address address = new();
-        if(StateContainer.CreatingDistributor)
+        if ((CurrentUserContainer.UserId == Guid.Empty)) // if there is no current user it simply assigns the field values to the variables
         {
-            StateContainer.TempProfile.Name = DistributorName;
+            Address address = new();
+            if (StateContainer.CreatingDistributor)
+            {
+                StateContainer.TempProfile.Name = DistributorName;
+            }
+            address.StreetNumber =  (int)StreetNumber;
+            address.StreetName = StreetName;
+            address.City = City;
+            StateContainer.TempProfile.PhoneNumber = Phone;
+            StateContainer.TempProfile.TypedAddress = address;
+            NavigationManager.NavigateTo("choosecuisines");
         }
-        address.StreetNumber = (int)StreetNumber;
-        address.StreetName = StreetName;
-        address.City = City;
-        StateContainer.TempProfile.PhoneNumber = Phone;
-        StateContainer.TempProfile.TypedAddress = address;
-        NavigationManager.NavigateTo("choosecuisines");
+        else // if there is a current user it checks if the fields are empty in which case the values stay the same
+        {
+            Profile profile = await data.GetProfileById(CurrentUserContainer.UserId);
+            ContactData contactData = new();
+            Address address = new();
+            if (StateContainer.CreatingDistributor)
+            {
+                StateContainer.TempProfile.Name = DistributorName;
+            }
+            address.StreetNumber = StreetNumber == null ? profile.TypedAddress.StreetNumber : (int)StreetNumber;
+            address.StreetName = StreetName == null ? profile.TypedAddress.StreetName : StreetName;
+            address.City = City == null ? profile.TypedAddress.City : City;
+            Phone ??= profile.PhoneNumber;
+            contactData.phone = Phone;
+            contactData.address = address;
+            contactData.name = profile.Name;
+            contactData.id = CurrentUserContainer.UserId;
+            await data.ChangeContactData(contactData.address, contactData.name, contactData.phone, contactData.id);
+            NavigationManager.NavigateTo("profile");
+        }
+            
     }
+    
 
     public void Dispose()
     {

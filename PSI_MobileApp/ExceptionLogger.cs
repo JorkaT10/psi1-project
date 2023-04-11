@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace PSI_MobileApp
 {
     public class ExceptionLogger : IDisposable
     {
-        private string path = "C:\\Users\\Rokas\\source\\repos\\merges-psi-project\\PSI_MobileApp\\TestLog.txt";
+        private string path = "C:\\Users\\Rokas\\source\\repos\\merges-psi-project\\PSI_MobileApp\\Log.txt";
         private FileStream fileStream;
         public ExceptionLogger() {
             if (!File.Exists(path))

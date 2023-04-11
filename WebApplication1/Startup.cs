@@ -40,7 +40,6 @@ namespace WebApplication1
             builder.RegisterType<ProfilesController>().EnableClassInterceptors().InterceptedBy(typeof(LoggingInterceptor));
             builder.RegisterType<AdvertisementsController>().EnableClassInterceptors().InterceptedBy(typeof(LoggingInterceptor));
             builder.RegisterType<DistributorController>().EnableClassInterceptors().InterceptedBy(typeof(LoggingInterceptor));
-			builder.RegisterType<RatingController>().EnableClassInterceptors().InterceptedBy(typeof(LoggingInterceptor));
             builder.RegisterType<LoggingInterceptor>().SingleInstance();
 
 		}

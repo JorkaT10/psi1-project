@@ -1,52 +1,49 @@
-﻿@page "/finishcreation"
-@using AccountDataSerializer
+﻿<!-- The end of profile creation and sends the profile to the database through the web service-->
+@page "/finishcreation"
 @using Microsoft.EntityFrameworkCore;
 @using Newtonsoft.Json
+@using PSI_MobileApp.DataServices;
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @using ClassLibrary
+@using PSI_MobileApp.Containers
+@inject IGetData data
 @inject StateContainer StateContainer
 @inject NavigationManager NavigationManager
-@inject ExceptionLogger Logger
-@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
-@if(Add())
+@if (createSuccessfully != null)
 {
-    <h3> Profile created successfully.</h3>
+    @if (createSuccessfully == true)
+    {
+        <h3> Profile created successfully.</h3>
+    }
+    else
+    {
+        <h3> Profile creation failed unexpectedly.</h3>
+        <MudButton @onclick="Reload"></MudButton>
+    }
 }
 else
 {
-    <h3> Profile creation failed unexpectedly.</h3>
+    <MudText> Creating Profile </MudText>
 }
 
 @code {
-
-    public bool Add()
+    bool? createSuccessfully = null;
+    public void Reload()
     {
-        try
-        {
-            using (ProjectDatabaseContext context = DbFactory.CreateDbContext())
-            {
+        NavigationManager.NavigateTo("finishcreation");
+    }
 
-                context.Add(StateContainer.TempAccount);
-                context.Add(StateContainer.TempProfile);
-                if(StateContainer.CreatingDistributor)
-                {
-                    Distributor newDistributor = new();
-                    newDistributor.Id = StateContainer.TempAccount.Id;
-                    newDistributor.Rating = 0;
-                    context.Add(newDistributor);
-                }
-
-                context.SaveChanges();
-            }
-        }
-        catch(Exception ex)
+    protected override async Task OnInitializedAsync()
+    {
+        await data.AddNewAccount(StateContainer.TempAccount);
+        await data.AddNewProfile(StateContainer.TempProfile);
+        if (StateContainer.CreatingDistributor)
         {
-            Logger.Log(ex);
-            return false;
+            await data.AddDistributor(StateContainer.TempAccount.Id);
         }
-        return true;
+        createSuccessfully = true;
     }
     public void Continue()
     {

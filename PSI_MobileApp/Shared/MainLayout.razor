@@ -1,5 +1,9 @@
 ﻿@inherits LayoutComponentBase
-
+@using ClassLibrary
+@using Microsoft.EntityFrameworkCore
+@using PSI_MobileApp.Containers
+@inject CurrentUserContainer container
+@inject NavigationManager NavigationManager
 <div class="page">
 	<MudThemeProvider />
 	<MudDialogProvider  />
@@ -7,14 +11,62 @@
 	<div class="sidebar">
 		<NavMenu />
 	</div>
-
+	
 	<main>
+
 		<div class="top-row px-4">
-			<a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-		</div>
+
+			<MudMenu>
+				<ActivatorContent>
+					<MudAvatar @ref="avatar"> @AddLetter() </MudAvatar>
+				</ActivatorContent>
+				<ChildContent>
+					@if(container.UserId != Guid.Empty)
+					{
+						<MudMenuItem >Profile</MudMenuItem>
+						<MudMenuItem OnClick="SignOut">Log Out</MudMenuItem>
+					}
+					else
+					{
+						<MudMenuItem OnClick="SignIn">Sign In</MudMenuItem>
+						<MudMenuItem OnClick="Register">Register</MudMenuItem>
+					}
+				</ChildContent>
+			</MudMenu>
+			
+			</div>
 
 		<article class="content px-4">
 			@Body
 		</article>
 	</main>
 </div>
+@code {
+	MudAvatar avatar;
+
+	public void SignOut()
+	{
+		container.Logout();
+	}
+
+	public void SignIn()
+	{
+		NavigationManager.NavigateTo("login");
+	}
+	public void Register()
+	{
+		NavigationManager.NavigateTo("chooseaccounttype");
+	}
+	public String AddLetter()
+	{
+		if((container.UserId != Guid.Empty))
+		{
+			return container.GetUserAccount().UserName.Substring(0, 1);
+		}
+		return "";
+	}
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+	}
+}

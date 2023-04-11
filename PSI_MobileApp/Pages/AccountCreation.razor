@@ -1,34 +1,74 @@
-﻿@page "/usercreateaccount"
-@using AccountDataSerializer
+﻿<!-- Page used to allow the user to input data relating to the account (username, password, email) -->
+@page "/usercreateaccount"
 @using Microsoft.EntityFrameworkCore;
 @using Newtonsoft.Json
+@using PSI_MobileApp.DataServices;
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @using System.Text.Json
 @using ClassLibrary
+@using PSI_MobileApp.Containers
 @using System.ComponentModel.DataAnnotations
 @implements IDisposable
-@inject ExceptionLogger ExceptionLogger
 @inject StateContainer StateContainer
+@inject IGetData data
 @inject NavigationManager NavigationManager
-@inject IDbContextFactory<ProjectDatabaseContext> DbContextFactory
 <h3>Create new account</h3>
-<!--<MudText> Test </MudText>-->
+<!--The form itself created using MudForm for detailed documentation please refer to https://mudblazor.com/components/form-->
 <MudForm @bind-isValid = "@isValid">
     <MudTextField T="string" Label="Username" @bind-Value="Username" Required="true" RequiredError="Field Username is required." Validation="@(new Func<string, string>(IsUniqueUsername))" />  
-    <MudTextField T="string" Label="Password" @bind-Value="Password" Required="true" RequiredError="Field Password is required." Validation="@(new Func<string, string>(ContainsWhitespace))"/>
-    <MudTextField T="string" Label="Confirm Password" @bind-Value="Confirm" Required="true" RequiredError="Field Confirm Password is required." Validation="@(new Func<string, string>(IsIdentical))" />
+    <MudTextField T="string" Label="Password" @bind-Value="Password" Required="true" RequiredError="Field Password is required." Validation="@(new Func<string, string>(ContainsWhitespace))" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
+    <MudTextField T="string" Label="Confirm Password" @bind-Value="Confirm" Required="true" RequiredError="Field Confirm Password is required." Validation="@(new Func<string, string>(IsIdentical))" InputType="@PasswordInputConfirm" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIconConfirm" OnAdornmentClick="ButtonTestclickConfirm" AdornmentAriaLabel="Show Password" />
     <MudTextField T="string" Label="Email" @bind-Value="Email" Required="true" RequiredError="Field Email is required." Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid."})" />
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!isValid)" Class="ml-auto" @onclick = "HandleSubmit">Register</MudButton>
 </MudForm>
 
 @code {
-    public bool isValid;
+    public bool isValid; // binding value which stores the validity of form.
+
+    // bools that store whether to show inputed password/confirmation or to keep it hidden
+    bool isShow; 
+    bool isShowConfirm;
+    //
+    public InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+    public InputType PasswordInputConfirm = InputType.Password;
+    string PasswordInputIconConfirm = Icons.Material.Filled.VisibilityOff;
     public string Username;
     public string Password;
     public string Email;
     public string Confirm;
-    public void HandleSubmit()
+    void ButtonTestclick() // configure isShow value
+    {
+        @if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+    void ButtonTestclickConfirm() // configure isShowConfirm value
+    {
+        @if (isShowConfirm)
+        {
+            isShowConfirm = false;
+            PasswordInputIconConfirm = Icons.Material.Filled.VisibilityOff;
+            PasswordInputConfirm = InputType.Password;
+        }
+        else
+        {
+            isShowConfirm = true;
+            PasswordInputIconConfirm = Icons.Material.Filled.Visibility;
+            PasswordInputConfirm = InputType.Text;
+        }
+    }
+    public void HandleSubmit() // handles valid submits by creating the temporary account and profile and storing them in the state container.
     {
         Profile profile = new();
         Account account = new();
@@ -49,7 +89,7 @@
             NavigationManager.NavigateTo("inputcontactdata");
         }
     }
-    public string IsIdentical(string confirm)
+    public string IsIdentical(string confirm) // checks if confirm passwword and password are the same
     {
 
         if (String.Equals(confirm, Password))
@@ -61,6 +101,10 @@
 
     public string ContainsWhitespace(string password)
     {
+        if (password == null)
+        {
+            return "Password cannot be empty.";
+        }
         if (password.Any(character => Char.IsWhiteSpace(character)))
         {
             return "Password cannot contain spaces.";
@@ -72,22 +116,15 @@
     {
         StateContainer.OnChange -= StateHasChanged;
     }
-    
-     public string IsUniqueUsername(string username)
-     {
-        using (var context = DbContextFactory.CreateDbContext())
+
+    public string IsUniqueUsername(string username)
+    {
+        if(data.GetAllAccountsConcurrent().All(a => !a.UserName.Equals(username)))
         {
-            try 
-            {
-                if(context.Accounts.All(elem => elem.UserName != username))
-                {
-                    return null;
-                }
-            }
-            catch(Exception ex)
-            {
-                ExceptionLogger.Log(ex);
-            }
+            return null;
+        }
+        else
+        {
             return "Username is already in use.";
         }
     }

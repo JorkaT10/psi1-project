@@ -1,23 +1,41 @@
-﻿@page "/profile"
-@using AccountDataSerializer
+﻿<!-- Page which consists of the data of the current user and allows the to edit their contact data or logout-->
+@page "/profile"
+@using PSI_MobileApp.Containers;
 @using ClassLibrary;
 @using Microsoft.EntityFrameworkCore;
+@using PSI_MobileApp.DataServices;
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @inject StateContainer StateContainer
 @inject NavigationManager NavigationManager
+@inject IGetData data
 @inject CurrentUserContainer CurrentUserContainer
-@inject ExceptionLogger Logger
-@inject IDbContextFactory<ProjectDatabaseContext> DbFactory
 @implements IDisposable
 <h3> </h3>
-@if (CurrentUserContainer.UserId != null)
+@if (profile != null)
 {
-    <h3> Test </h3>
+    <h3> Profile Page </h3>
+    <h2> @profile.Name; </h2>
+    <MudText>Email: @profile.Email;</MudText>
+    <MudText>Address: @profile.TypedAddress.City, @profile.TypedAddress.StreetName st. @profile.TypedAddress.StreetNumber;</MudText>
+    <MudText>Phone Number: @profile.PhoneNumber;</MudText>
+    <MudText>Cuisines:
+        @foreach (var cuisine in profile.CuisineArray)
+        {
+            var last = profile.CuisineArray.LastOrDefault();
+            if (cuisine != last)
+                @(cuisine + ", ")
+            else
+                @cuisine
+        };
+    </MudText>
+    <MudButton @onclick = "ChangeContactInfo">Change Contact Info</MudButton>
     <MudButton @onclick = "Logout">Logout</MudButton>
 }
 else
 {
+    <h3>Login</h3>
+    <p>Welcome to the login page. Please log in or register a new account.</p>
     <MudButton @onclick="Login" Variant="Variant.Filled"> Login </MudButton>
     <MudButton @onclick="Register" Variant="Variant.Filled"> Register</MudButton>
 }
@@ -25,6 +43,7 @@ else
 
 
 @code {
+    public Profile profile;
     public void Register()
     {
         NavigationManager.NavigateTo("chooseaccounttype");
@@ -34,15 +53,24 @@ else
 
     public void Logout()
     {
-        CurrentUserContainer.Logout(Logger, DbFactory.CreateDbContext());
+        CurrentUserContainer.Logout();
         NavigationManager.NavigateTo("profile");
+    }
+
+    public void ChangeContactInfo()
+    {
+        StateContainer.CreatingDistributor = false;
+        NavigationManager.NavigateTo("inputcontactdata");
     }
 
     public void Login()
     {
         NavigationManager.NavigateTo("login");
     }
-
+    protected override async Task OnInitializedAsync()
+    {
+        profile = await data.GetProfileById(CurrentUserContainer.UserId);
+    }   
     public void Dispose()
     {
         StateContainer.OnChange -= StateHasChanged;

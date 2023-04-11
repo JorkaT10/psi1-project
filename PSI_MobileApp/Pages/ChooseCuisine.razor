@@ -1,11 +1,12 @@
-﻿@page "/choosecuisines"
-@using AccountDataSerializer
+﻿<!-- Page in which the user chooses which cuisines they prefer / serve -->
+@page "/choosecuisines"
 @using Newtonsoft.Json
 @using ProfileClasses
 @using System.Collections.ObjectModel
 @using System.Text.Json
 @using ClassLibrary
 @using System.Linq
+@using PSI_MobileApp.Containers
 @inject StateContainer StateContainer
 @inject NavigationManager NavigationManager
 @implements IDisposable
@@ -27,18 +28,18 @@ else
 @code {
     public string cuisine;
     public IEnumerable<string> cuisines { get; set; } = new HashSet<string>() { };
-    public string[] Kitchens = (Enum.GetNames(typeof(Cuisines))).SkipLast(1).ToArray();
-    public void Check()
+    public string[] Kitchens = (Enum.GetNames(typeof(Cuisines))).SkipLast(1).ToArray(); // skips the last value of Enum Cuisines which is always supposed to be Cuisines.None to disallow the user to choose Cuisines.None directly
+    public void Check() // Handles user choice of cuisines. If there is any need to edit this function please refer to mudblazor.com/components/select
     {
-        if(cuisines.Count() == 0)
+        if(cuisines.Count() == 0) // if the user selects no cuisines their cuisines are set to Cuisines.None
         {
             Cuisines[] cuisines = { Cuisines.None };
             StateContainer.TempProfile.CuisineArray = cuisines;
         }
-        else
+        else // assignes the chosen cuisines to a list and links it to the profile
         {
-            List<Cuisines> list = new List<Cuisines>();
-            foreach(var elem in cuisines)
+            List<Cuisines> list = new List<Cuisines>(); 
+            foreach(var elem in cuisines) 
             {
                 list.Add((Cuisines)Enum.Parse(typeof(Cuisines), elem));
             }

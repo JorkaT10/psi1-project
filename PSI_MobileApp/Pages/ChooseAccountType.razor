@@ -1,14 +1,15 @@
-﻿@page "/chooseaccounttype"
-@using AccountDataSerializer
+﻿<!-- Page in which a new user selects what type of account he wants to create -->
+@page "/chooseaccounttype"
 @using ProfileClasses
 @using System.Collections.ObjectModel
+@using PSI_MobileApp.Containers
 @inject StateContainer StateContainer
 @inject NavigationManager NavigationManager
 @implements IDisposable
 
 <h3>What type of account do you want to create?</h3>
-<MudButton @onclick="Customer" Variant="Variant.Filled"> Customer </MudButton>
-<MudButton @onclick="Supplier" Variant="Variant.Filled"> Supplier</MudButton>
+<MudButton @onclick="Customer" Variant="Variant.Filled">Customer</MudButton>
+<MudButton @onclick="Supplier" Variant="Variant.Filled">Supplier</MudButton>
 
 @code {
 

@@ -16,8 +16,7 @@ namespace ProfileClasses
         public string UserName { get; set; }
         public string Password { get; set; }
     }
-
-    public class Profile : IUsingUUID
+	public class Profile : IUsingUUID
     {
         private Guid _id;
         private string _email;
@@ -45,8 +44,7 @@ namespace ProfileClasses
         public Cuisines[] CuisineArray { get { return _cuisines; } set { _cuisines = value; } }
 
     }
-
-    public class Distributor : IUsingUUID
+	public class Distributor : IUsingUUID
     {
         private double _rating;
         private int _ratingAmount;

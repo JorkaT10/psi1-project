@@ -446,43 +446,4 @@ namespace PSI_MobileApp.DataServices
                 }
             }
         }
-        public async Task ChangeRating(Ratings rating)
-        {
-            using (var client = new HttpClient())
-            {
-                string url = $"{_baseUrl}/AddRating";
-                var apiResponse = await client.PutAsJsonAsync(url, rating);
-                int i = 0; // for breakpoints
-                if (!apiResponse.IsSuccessStatusCode)
-                {
-                    url = $"{_baseUrl}/ChangeRating";
-                    apiResponse = await client.PutAsJsonAsync(url, rating);
-                    int j = 0; // for breakpoints
-					if (!apiResponse.IsSuccessStatusCode)
-                    {
-                        throw new HttpRequestException();
-                    }
-                }
-            }
-        }
-		public async Task<List<Ratings>> GetRatingsByUserId(Guid? id)
-		{
-			List<Ratings> returnResponse = null;
-			if ((id == null) || (id == Guid.Empty))
-			{
-				return null;
-			}
-			using (var client = new HttpClient())
-			{
-				string url = $"{_baseUrl}/GetRatingsByUserId?id={id}";
-				var apiResponse = await client.GetAsync(url);
-				if (apiResponse.IsSuccessStatusCode)
-				{
-					var response = await apiResponse.Content.ReadAsStringAsync();
-					returnResponse = JsonConvert.DeserializeObject<List<Ratings>>(response);
-				}
-			}
-			return returnResponse;
-		}
-	}
 }
