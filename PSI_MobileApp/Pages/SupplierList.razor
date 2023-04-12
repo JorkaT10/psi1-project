@@ -68,7 +68,7 @@ else
 		</HeaderContent>
         <RowTemplate>
             <MudTd>@context.Name</MudTd>
-            <MudTd><MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(Distributors.Where(d => d.Id == context.Id).FirstOrDefault().Rating)></MudRating></MudTd>
+            <MudTd><MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(Distributors.Where(d => d.Id == context.Id).FirstOrDefault().Rating / Distributors.Where(d => d.Id == context.Id).FirstOrDefault().RatingAmount)></MudRating></MudTd>
             <MudTd>@context.PhoneNumber</MudTd>
             <MudTd>
                 @foreach (var cuisine in context.CuisineArray)

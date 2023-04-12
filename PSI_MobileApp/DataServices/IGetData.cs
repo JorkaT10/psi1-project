@@ -38,4 +38,7 @@ namespace PSI_MobileApp.DataServices
         ObservableCollection<Account> GetAllAccountsConcurrent();
         Task<bool> TestConnection();
         Task ChangeContactData(Address address, string name, string phone, Guid id);
+		Task ChangeRating(Ratings rating);
+		Task<List<Ratings>> GetRatingsByUserId(Guid? id);
+	}
 }
