@@ -40,3 +40,6 @@ jobs:
       
     - name: Build
       run: dotnet build PSI_MobileApp/PSI_MobileApp.csproj -c Release -f:net6.0-windows10.0.19041.0
+      
+    - name: Test
+      run: dotnet test PSI_MobileAppTests/PSI_MobileAppTests.csproj
