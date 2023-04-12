@@ -27,7 +27,7 @@ namespace PSI_MobileApp.DataServices
             {
                 string url = $"{_baseUrl}/GetAllProfiles";
                 var apiResponse = await client.GetAsync(url);
-                if(apiResponse.IsSuccessStatusCode)
+                if (apiResponse.IsSuccessStatusCode)
                 {
                     var response = await apiResponse.Content.ReadAsStringAsync();
                     returnResponse = JsonConvert.DeserializeObject<ObservableCollection<Profile>>(response);
@@ -38,7 +38,7 @@ namespace PSI_MobileApp.DataServices
         public async Task<Profile> GetProfileById(Guid? id)
         {
             Profile returnResponse = null;
-            if((id == null) || (id == Guid.Empty))
+            if ((id == null) || (id == Guid.Empty))
             {
                 return null;
             }
@@ -102,10 +102,10 @@ namespace PSI_MobileApp.DataServices
             return returnResponse;
         }
 
-        public async Task<Advertisement>GetAdvertisementsById(Guid id)
+        public async Task<Advertisement> GetAdvertisementsById(Guid id)
         {
             var returnResponse = new Advertisement();
-            if(id == Guid.Empty)
+            if (id == Guid.Empty)
             {
                 return null;
             }
@@ -122,7 +122,7 @@ namespace PSI_MobileApp.DataServices
             return returnResponse;
         }
 
-        public async Task<ObservableCollection<Advertisement>>GetAdsByDistributorId(Guid id)
+        public async Task<ObservableCollection<Advertisement>> GetAdsByDistributorId(Guid id)
         {
             var returnResponse = new ObservableCollection<Advertisement>();
             if (id == Guid.Empty)
@@ -142,7 +142,7 @@ namespace PSI_MobileApp.DataServices
             return returnResponse;
         }
 
-        public async Task<ObservableCollection<Advertisement>>GetAdsByBuyerId(Guid id)
+        public async Task<ObservableCollection<Advertisement>> GetAdsByBuyerId(Guid id)
         {
             var returnResponse = new ObservableCollection<Advertisement>();
             if (id == Guid.Empty)
@@ -162,7 +162,7 @@ namespace PSI_MobileApp.DataServices
             return returnResponse;
         }
 
-        public async Task<ObservableCollection<Distributor>>GetAllDistributors()
+        public async Task<ObservableCollection<Distributor>> GetAllDistributors()
         {
             var returnResponse = new ObservableCollection<Distributor>();
             using (var client = new HttpClient())
@@ -197,7 +197,7 @@ namespace PSI_MobileApp.DataServices
             return returnResponse;
         }
 
-        public async Task<Distributor>GetDistributorsById(Guid id)
+        public async Task<Distributor> GetDistributorsById(Guid id)
         {
             var returnResponse = new Distributor();
             if (id == Guid.Empty)
@@ -425,12 +425,12 @@ namespace PSI_MobileApp.DataServices
                     }
                     return false;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     return false;
                 }
-                
-                
+
+
             }
         }
         public async Task ChangeContactData(Address address, string name, string phone, Guid id)
@@ -446,4 +446,43 @@ namespace PSI_MobileApp.DataServices
                 }
             }
         }
+		public async Task ChangeRating(Ratings rating)
+		{
+			using (var client = new HttpClient())
+			{
+				string url = $"{_baseUrl}/AddRating";
+				var apiResponse = await client.PutAsJsonAsync(url, rating);
+				int i = 0; // for breakpoints
+				if (!apiResponse.IsSuccessStatusCode)
+				{
+					url = $"{_baseUrl}/ChangeRating";
+					apiResponse = await client.PutAsJsonAsync(url, rating);
+					int j = 0; // for breakpoints
+					if (!apiResponse.IsSuccessStatusCode)
+					{
+						throw new HttpRequestException();
+					}
+				}
+			}
+		}
+		public async Task<List<Ratings>> GetRatingsByUserId(Guid? id)
+		{
+			List<Ratings> returnResponse = null;
+			if ((id == null) || (id == Guid.Empty))
+			{
+				return null;
+			}
+			using (var client = new HttpClient())
+			{
+				string url = $"{_baseUrl}/GetRatingsByUserId?id={id}";
+				var apiResponse = await client.GetAsync(url);
+				if (apiResponse.IsSuccessStatusCode)
+				{
+					var response = await apiResponse.Content.ReadAsStringAsync();
+					returnResponse = JsonConvert.DeserializeObject<List<Ratings>>(response);
+				}
+			}
+			return returnResponse;
+		}
+    }
 }

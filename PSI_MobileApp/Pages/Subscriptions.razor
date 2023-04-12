@@ -12,7 +12,6 @@
 @inject NavigationManager NavigationManager
 @inject CurrentUserContainer CurrentUserContainer
 @inject IGetData data
-@implements IDisposable
 
 <h3>Subscriptions</h3>
 @if (Profile == null || Profile?.Subscriptions == null)
@@ -32,17 +31,35 @@ else
 		<tbody>
 				@foreach (var supplier in Profile.Subscriptions)
 				{
+					R = 0;
+					@if (Ratings != null)
+					{
+						@foreach (var rating in Ratings)
+						{
+							
+							@if (rating.DistributorId == supplier.Id)
+							{
+								R = rating.rating;
+								break;
+							}
+						}
+					}
+					
 					<tr>
 						<td @onclick="()=>GoToDetailOnClick(DistributorProfiles.First(i => supplier.Id == i.Id))">@DistributorProfiles.First(i => supplier.Id == i.Id).Name</td>
-						<MudRating ReadOnly="true" Color="Color.Dark" SelectedValue=@Convert.ToInt32(supplier.Rating)></MudRating>
+						<MudRating ReadOnly="false" Color="Color.Dark" SelectedValue=@R SelectedValueChanged="ChangeCurrentRating"
+							@onclick="async () => await ChangeRating(new Ratings(CurrentUserContainer.UserId, supplier.Id, 2))"></MudRating>
 						<td>
 							@foreach (var cuisine in DistributorProfiles.First(i => supplier.Id == i.Id).CuisineArray)
 							{
-								@cuisine.ToString()<br>
+								@cuisine.ToString()
+
+								<br>
 							}
 						</td>
-					<MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="async ()=> await ChangeSubscriptionStatus(supplier.Id)">Unsubscribe</MudButton>
+						<MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="async ()=> await ChangeSubscriptionStatus(supplier.Id)">Unsubscribe</MudButton>
 					</tr>
+					
 				}
 		</tbody>
 	</table>
@@ -50,6 +67,9 @@ else
 
 @code {
 	public Profile Profile { get; set; }
+	public List<Ratings> Ratings { get; set; }
+	public int CurrentRating { get; set; }
+	public int R { get; set; }
 	public ObservableCollection<Profile> DistributorProfiles { get; set; }
 	public void GoToDetailOnClick(Profile supplier)
 	{
