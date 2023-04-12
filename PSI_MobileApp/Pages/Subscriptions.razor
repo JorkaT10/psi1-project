@@ -28,27 +28,31 @@ else
 				<th>Cuisines</th>
 			</tr>
 		</thead>
-		<tbody>
+        <tbody>
+            
 				@foreach (var supplier in Profile.Subscriptions)
 				{
-					R = 0;
+					i = 0;
 					@if (Ratings != null)
 					{
 						@foreach (var rating in Ratings)
 						{
-							
 							@if (rating.DistributorId == supplier.Id)
 							{
-								R = rating.rating;
+								CurrentRating = rating.rating;
+								OGCR = CR;
 								break;
 							}
 						}
 					}
-					
+					i = 1;
 					<tr>
-						<td @onclick="()=>GoToDetailOnClick(DistributorProfiles.First(i => supplier.Id == i.Id))">@DistributorProfiles.First(i => supplier.Id == i.Id).Name</td>
-						<MudRating ReadOnly="false" Color="Color.Dark" SelectedValue=@R SelectedValueChanged="ChangeCurrentRating"
-							@onclick="async () => await ChangeRating(new Ratings(CurrentUserContainer.UserId, supplier.Id, 2))"></MudRating>
+						<td @onclick="() => GoToDetailOnClick(DistributorProfiles.First(i => supplier.Id == i.Id))">
+							@DistributorProfiles.First(i => supplier.Id == i.Id).Name</td>
+						<MudRating ReadOnly="false" Color="Color.Dark" @bind-SelectedValue="CurrentRating"
+							@onmousedown="() => Distributor = supplier.Id"></MudRating>
+							@*SelectedValue=@CurrentRating SelectedValueChanged="ChangeCurrentRating @onclick="() => ChangeCurrentRating()"*@
+							@*@onclick="async () => await ChangeRating(new Ratings(CurrentUserContainer.UserId, supplier.Id, 2))" *@
 						<td>
 							@foreach (var cuisine in DistributorProfiles.First(i => supplier.Id == i.Id).CuisineArray)
 							{
@@ -57,7 +61,8 @@ else
 								<br>
 							}
 						</td>
-						<MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" @onclick="async ()=> await ChangeSubscriptionStatus(supplier.Id)">Unsubscribe</MudButton>
+						<MudButton Variant="Variant.Filled" Color="Color.Secondary" class="btn btn-primary" 
+							@onclick="async ()=> await ChangeSubscriptionStatus(supplier.Id)">Unsubscribe</MudButton>
 					</tr>
 					
 				}
@@ -68,8 +73,23 @@ else
 @code {
 	public Profile Profile { get; set; }
 	public List<Ratings> Ratings { get; set; }
-	public int CurrentRating { get; set; }
-	public int R { get; set; }
+	private int OGCR, CR, i;
+	public int CurrentRating 
+	{ 
+		get { return CR; } 
+		set
+		{
+			if(OGCR != value)
+			{
+				CR = value;
+				if(i == 1)
+				{
+					data.ChangeRating(new Ratings(CurrentUserContainer.UserId, Distributor, value));
+				}
+			}
+		}
+	}
+	public Guid Distributor;
 	public ObservableCollection<Profile> DistributorProfiles { get; set; }
 	public void GoToDetailOnClick(Profile supplier)
 	{
@@ -86,14 +106,9 @@ else
 		//context.SaveChanges();
 	}
 
-	public async Task ChangeRating(Ratings rating)
+	public async Task ChangeCurrentRating()
 	{
-		await data.ChangeRating(rating);
-		//context.SaveChanges();
-	}
-	public void ChangeCurrentRating(int rating)
-	{
-		CurrentRating = rating;
+		await data.ChangeRating(new Ratings(CurrentUserContainer.UserId, Distributor, CurrentRating));
 	}
 
 	protected override async Task OnInitializedAsync()
@@ -102,18 +117,12 @@ else
 		StateContainer.OnChange += StateHasChanged;
 		Profile = null;
 		if(CurrentUserContainer.UserId != Guid.Empty)
-    {
+		{
 			Profile = await data.GetProfileById(CurrentUserContainer.UserId);
+			Ratings = await data.GetRatingsByUserId(CurrentUserContainer.UserId);
 		}
 		DistributorProfiles = await data.GetDistributorProfiles();
     
 		await base.OnInitializedAsync();
   }
-  
-	}
-	public void Dispose()
-	{
-		StateContainer.OnChange -= StateHasChanged;
-	}
-
 }

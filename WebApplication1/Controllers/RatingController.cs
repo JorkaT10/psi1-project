@@ -37,30 +37,32 @@ namespace WebApplication1.Controllers
         {
             Ratings rating = r;
             await _context.Ratings.AddAsync(rating);
-            UpdateDistributorRating(r.DistributorId, r.rating);
+            await UpdateDistributorRating(r.DistributorId, r.rating, true);
 			await _context.SaveChangesAsync();
 		}
 		[HttpPut("~/ChangeRating")]
 		public async Task ChangeRating([FromBody] Ratings r)
-        {
+		{
 			//var profile = await _context.Profiles.Where(profile => profile.Id == id).FirstOrDefaultAsync();
-            var rating = await _context.Ratings.Where(rating => rating.Id == r.Id && rating.DistributorId == r.DistributorId).FirstOrDefaultAsync();
+			Ratings? rating = await _context.Ratings.Where(rating => rating.Id == r.Id && rating.DistributorId == r.DistributorId).FirstOrDefaultAsync();
             int changed = r.rating - rating.rating;
             rating.rating = r.rating;
             //await _context.Ratings.AddAsync(rating);
-            UpdateDistributorRating(r.DistributorId, changed);
+            await UpdateDistributorRating(r.DistributorId, changed, false);
 			await _context.SaveChangesAsync();
 		}
 
-        public async void UpdateDistributorRating(Guid DistributorId, int RatingChange) // padaryti per HTTP kaip ir tarkim ChangeRating
+        public async Task UpdateDistributorRating(Guid DistributorId, int RatingChange, bool n) // padaryti per HTTP kaip ir tarkim ChangeRating
         {
             var distributor = await _context.Distributors.Where(d => d.Id == DistributorId).FirstOrDefaultAsync();
             if (distributor == null)
             {
                 return;
             }
-
-            distributor.RatingAmount++;
+            if(n == true)
+            {
+                distributor.RatingAmount++;
+            }
             distributor.Rating += RatingChange;
             //await _context.SaveChangesAsync();
         }
