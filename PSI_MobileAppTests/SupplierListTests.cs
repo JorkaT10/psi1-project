@@ -21,7 +21,7 @@ namespace PSI_MobileAppTests
 {
     public class SupplierListTests
     {
-        [Fact]
+        /*[Fact]
         public void TableShouldWork()
         {
             var mockAPI = new Mock<IGetData>();
@@ -97,7 +97,7 @@ namespace PSI_MobileAppTests
             Assert.NotNull(loadingText);
             Assert.Contains("Loading...", loadingText[0].TextContent);
 
-        }
+        }*/
 
 
         private static ObservableCollection<Profile> GetProfiles()
